@@ -1,19 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  createHeroBanner,
+  deleteHeroBanner,
+  getHeroBanners,
+  updateHeroBanner,
+} from '@/lib/actions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { getHeroBanners, createHeroBanner, updateHeroBanner, deleteHeroBanner } from '@/lib/actions';
+import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { Edit, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface HeroBanner {
   id: string;
@@ -35,7 +40,7 @@ export default function HeroBannersPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentBanner, setCurrentBanner] = useState<Partial<HeroBanner>>({});
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const permissions = usePermissions(Resource.HERO_BANNERS);
 
   useEffect(() => {
@@ -125,10 +130,10 @@ export default function HeroBannersPage() {
           <p className="text-muted-foreground mt-1">Manage homepage hero banners and CTAs</p>
         </div>
         <PermissionGate resource={Resource.HERO_BANNERS} action="create">
-          <Button 
-            onClick={() => { 
-              setIsEditing(true); 
-              setCurrentBanner({ order: banners.length, isActive: true }); 
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+              setCurrentBanner({ order: banners.length, isActive: true });
             }}
             className="btn-gradient-primary"
           >
@@ -167,7 +172,9 @@ export default function HeroBannersPage() {
               <Textarea
                 rows={2}
                 value={currentBanner.description || ''}
-                onChange={(e) => setCurrentBanner({ ...currentBanner, description: e.target.value })}
+                onChange={(e) =>
+                  setCurrentBanner({ ...currentBanner, description: e.target.value })
+                }
                 placeholder="Brief description..."
               />
             </div>
@@ -206,14 +213,18 @@ export default function HeroBannersPage() {
                 <Input
                   type="number"
                   value={currentBanner.order || 0}
-                  onChange={(e) => setCurrentBanner({ ...currentBanner, order: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setCurrentBanner({ ...currentBanner, order: parseInt(e.target.value) })
+                  }
                 />
               </div>
               <div className="flex items-center gap-3 mt-6">
                 <input
                   type="checkbox"
                   checked={currentBanner.isActive ?? true}
-                  onChange={(e) => setCurrentBanner({ ...currentBanner, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setCurrentBanner({ ...currentBanner, isActive: e.target.checked })
+                  }
                   className="w-4 h-4 text-primary rounded focus:ring-primary"
                 />
                 <label className="text-sm font-medium">Active</label>
@@ -221,16 +232,24 @@ export default function HeroBannersPage() {
             </div>
 
             <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving || !currentBanner.title || !currentBanner.imageUrl || !permissions.canUpdate}
+              <Button
+                onClick={handleSave}
+                disabled={
+                  isSaving ||
+                  !currentBanner.title ||
+                  !currentBanner.imageUrl ||
+                  !permissions.canUpdate
+                }
                 className="btn-gradient-primary"
               >
                 {isSaving ? 'Saving...' : 'Save Banner'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => { setIsEditing(false); setCurrentBanner({}); }}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentBanner({});
+                }}
                 disabled={isSaving}
               >
                 Cancel
@@ -284,7 +303,10 @@ export default function HeroBannersPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => { setCurrentBanner(banner); setIsEditing(true); }}
+                        onClick={() => {
+                          setCurrentBanner(banner);
+                          setIsEditing(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -16,7 +16,13 @@ export async function GET() {
     console.error('Error fetching contact submissions:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch submissions' },
-      { status: error.message?.includes('Unauthorized') ? 401 : error.message?.includes('Forbidden') ? 403 : 500 }
+      {
+        status: error.message?.includes('Unauthorized')
+          ? 401
+          : error.message?.includes('Forbidden')
+            ? 403
+            : 500,
+      }
     );
   }
 }
@@ -38,7 +44,13 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating submission:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update submission' },
-      { status: error.message?.includes('Unauthorized') ? 401 : error.message?.includes('Forbidden') ? 403 : 500 }
+      {
+        status: error.message?.includes('Unauthorized')
+          ? 401
+          : error.message?.includes('Forbidden')
+            ? 403
+            : 500,
+      }
     );
   }
 }

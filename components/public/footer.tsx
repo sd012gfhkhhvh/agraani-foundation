@@ -1,5 +1,5 @@
+import { Facebook, Mail, Youtube } from 'lucide-react';
 import Link from 'next/link';
-import { Facebook, Youtube, Mail } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -10,8 +10,8 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-xl font-bold mb-4">Agraani Welfare Foundation</h3>
             <p className="text-gray-300 max-w-md">
-              An organization focused on Women and Child Education, Training & Development,
-              and enabling self-dependence in West Bengal, India.
+              An organization focused on Women and Child Education, Training & Development, and
+              enabling self-dependence in West Bengal, India.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-            
+
             <div className="flex gap-4 mt-4">
               <a
                 href="https://www.facebook.com/share/1Gyuj8ASUE/"

@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Mail, Phone, Calendar, Trash2, Eye } from 'lucide-react';
-import { PermissionGate } from '@/components/admin/PermissionGate';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
+import {
+  deleteContactSubmission,
+  getContactSubmissions,
+  markSubmissionAsRead,
+} from '@/lib/actions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { getContactSubmissions, markSubmissionAsRead, deleteContactSubmission } from '@/lib/actions';
+import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { Calendar, Eye, Mail, Phone, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ContactSubmission {
   id: string;
@@ -38,7 +42,7 @@ export default function ContactSubmissionsPage() {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('unread');
-  
+
   const permissions = usePermissions(Resource.CONTACT_SUBMISSIONS);
 
   useEffect(() => {
@@ -82,9 +86,8 @@ export default function ContactSubmissionsPage() {
     }
   };
 
-  const filteredSubmissions = filter === 'unread' 
-    ? submissions.filter(s => !s.isRead)
-    : submissions;
+  const filteredSubmissions =
+    filter === 'unread' ? submissions.filter((s) => !s.isRead) : submissions;
 
   if (isLoading) {
     return <LoadingCard />;
@@ -102,7 +105,7 @@ export default function ContactSubmissionsPage() {
             variant={filter === 'unread' ? 'default' : 'outline'}
             onClick={() => setFilter('unread')}
           >
-            Unread ({submissions.filter(s => !s.isRead).length})
+            Unread ({submissions.filter((s) => !s.isRead).length})
           </Button>
           <Button
             variant={filter === 'all' ? 'default' : 'outline'}
@@ -117,13 +120,17 @@ export default function ContactSubmissionsPage() {
         <EmptyState
           icon={Mail}
           title={filter === 'unread' ? 'No unread submissions' : 'No submissions yet'}
-          description={filter === 'unread' ? 'All submissions have been read' : 'No one has submitted the contact form yet'}
+          description={
+            filter === 'unread'
+              ? 'All submissions have been read'
+              : 'No one has submitted the contact form yet'
+          }
         />
       ) : (
         <div className="space-y-4">
           {filteredSubmissions.map((submission) => (
-            <Card 
-              key={submission.id} 
+            <Card
+              key={submission.id}
               className={`card-hover ${submission.isRead ? 'opacity-60' : 'border-l-4 border-l-primary'}`}
             >
               <CardContent className="p-6">
@@ -131,9 +138,7 @@ export default function ContactSubmissionsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-semibold text-lg">{submission.name}</h3>
-                      {!submission.isRead && (
-                        <Badge className="bg-primary text-white">New</Badge>
-                      )}
+                      {!submission.isRead && <Badge className="bg-primary text-white">New</Badge>}
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -178,14 +183,14 @@ export default function ContactSubmissionsPage() {
                     </PermissionGate>
                   </div>
                 </div>
-                
+
                 {submission.subject && (
                   <div className="mb-3">
                     <span className="font-medium text-sm">Subject: </span>
                     <span className="text-sm">{submission.subject}</span>
                   </div>
                 )}
-                
+
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">{submission.message}</p>
                 </div>

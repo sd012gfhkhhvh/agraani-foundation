@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, FileText } from 'lucide-react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
-import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Textarea } from '@/components/ui/textarea';
 import { getAboutContent, updateAboutContent } from '@/lib/actions';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { FileText, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface AboutSection {
   id: string;
@@ -26,7 +26,7 @@ interface AboutSection {
 export default function AboutContentPage() {
   const [sections, setSections] = useState<AboutSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const permissions = usePermissions(Resource.ABOUT_CONTENT);
 
   useEffect(() => {
@@ -99,12 +99,12 @@ export default function AboutContentPage() {
   );
 }
 
-function AboutSectionEdit({ 
-  section, 
+function AboutSectionEdit({
+  section,
   onSave,
-  canEdit
-}: { 
-  section: AboutSection; 
+  canEdit,
+}: {
+  section: AboutSection;
   onSave: (section: AboutSection) => void;
   canEdit: boolean;
 }) {
@@ -152,11 +152,11 @@ function AboutSectionEdit({
                 <Save className="h-4 w-4 mr-2" />
                 Save
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => { 
-                  setEditedSection(section); 
-                  setIsEditing(false); 
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditedSection(section);
+                  setIsEditing(false);
                 }}
               >
                 Cancel

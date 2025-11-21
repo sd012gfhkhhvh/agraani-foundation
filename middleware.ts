@@ -1,15 +1,16 @@
-import { NextResponse } from 'next/server';
 import { auth as middleware } from '@/lib/auth';
+import { NextResponse } from 'next/server';
 
 export default middleware((request) => {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
-  
+
   // Get the subdomain
   const subdomain = hostname.split('.')[0];
-  const isAdminSubdomain = subdomain === process.env.NEXT_PUBLIC_ADMIN_SUBDOMAIN || 
-                           subdomain === 'admin' ||
-                           hostname.startsWith('admin.');
+  const isAdminSubdomain =
+    subdomain === process.env.NEXT_PUBLIC_ADMIN_SUBDOMAIN ||
+    subdomain === 'admin' ||
+    hostname.startsWith('admin.');
 
   // Handle admin subdomain routing
   if (isAdminSubdomain && !pathname.startsWith('/admin')) {
@@ -31,6 +32,6 @@ export const config = {
      * - api/auth (auth routes)
      * - login (login page)
      */
-    '/((?!_next/static|_next/image|favicon.ico|images|.*\\..*|api/auth|login).*)' 
+    '/((?!_next/static|_next/image|favicon.ico|images|.*\\..*|api/auth|login).*)',
   ],
 };

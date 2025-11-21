@@ -1,13 +1,14 @@
-import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, Lightbulb, Users2, Heart } from 'lucide-react';
+import { prisma } from '@/lib/prisma';
+import { Heart, Lightbulb, Target, Users2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'About Us - Agraani Welfare Foundation',
-  description: 'Learn about our mission, vision, and commitment to empowering women and children in West Bengal through education and community development.',
+  description:
+    'Learn about our mission, vision, and commitment to empowering women and children in West Bengal through education and community development.',
 };
 
 export default async function AboutPage() {
@@ -19,23 +20,24 @@ export default async function AboutPage() {
     }),
   ]);
 
-  const mission = aboutContent.find(c => c.section === 'mission');
-  const vision = aboutContent.find(c => c.section === 'vision');
-  const about = aboutContent.find(c => c.section === 'about');
+  const mission = aboutContent.find((c) => c.section === 'mission');
+  const vision = aboutContent.find((c) => c.section === 'vision');
+  const about = aboutContent.find((c) => c.section === 'about');
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 bg-linear-to-br from-primary via-primary/90 to-secondary overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               About <span className="text-secondary">Agraani</span>
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-              Building a future where every woman has the opportunity to thrive and every child can dream
+              Building a future where every woman has the opportunity to thrive and every child can
+              dream
             </p>
           </div>
         </div>
@@ -47,12 +49,12 @@ export default async function AboutPage() {
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <Card className="border-2 border-primary/10 shadow-xl">
               <CardContent className="p-8 md:p-12">
-                <h2 className="text-3xl font-bold mb-6 text-gradient-primary">
-                  {about.title}
-                </h2>
+                <h2 className="text-3xl font-bold mb-6 text-gradient-primary">{about.title}</h2>
                 <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
                   {about.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4">{paragraph}</p>
+                    <p key={index} className="mb-4">
+                      {paragraph}
+                    </p>
                   ))}
                 </div>
               </CardContent>
@@ -74,9 +76,7 @@ export default async function AboutPage() {
                     </div>
                     <h2 className="text-3xl font-bold">Our Mission</h2>
                   </div>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    {mission.content}
-                  </p>
+                  <p className="text-lg text-muted-foreground leading-relaxed">{mission.content}</p>
                 </CardContent>
               </Card>
             )}
@@ -90,9 +90,7 @@ export default async function AboutPage() {
                     </div>
                     <h2 className="text-3xl font-bold">Our Vision</h2>
                   </div>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    {vision.content}
-                  </p>
+                  <p className="text-lg text-muted-foreground leading-relaxed">{vision.content}</p>
                 </CardContent>
               </Card>
             )}
@@ -147,9 +145,21 @@ export default async function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Heart, title: 'Compassion', description: 'We lead with empathy and understanding in everything we do' },
-              { icon: Users2, title: 'Empowerment', description: 'We believe in creating opportunities for self-sufficiency and growth' },
-              { icon: Target, title: 'Impact', description: 'We measure success through the positive change we create' },
+              {
+                icon: Heart,
+                title: 'Compassion',
+                description: 'We lead with empathy and understanding in everything we do',
+              },
+              {
+                icon: Users2,
+                title: 'Empowerment',
+                description: 'We believe in creating opportunities for self-sufficiency and growth',
+              },
+              {
+                icon: Target,
+                title: 'Impact',
+                description: 'We measure success through the positive change we create',
+              },
             ].map((value, index) => (
               <Card key={index} className="card-hover text-center">
                 <CardContent className="p-8">

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(programs);
   } catch (error) {
     console.error('Error fetching programs:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch programs' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch programs' }, { status: 500 });
   }
 }
 
@@ -31,7 +28,12 @@ export async function POST(request: NextRequest) {
     const program = await prisma.program.create({
       data: {
         title: data.title,
-        slug: data.slug || data.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'),
+        slug:
+          data.slug ||
+          data.title
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-'),
         description: data.description,
         imageUrl: data.imageUrl,
         icon: data.icon,
@@ -45,7 +47,14 @@ export async function POST(request: NextRequest) {
     console.error('Error creating program:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create program' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -67,7 +76,14 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating program:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update program' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -92,7 +108,14 @@ export async function DELETE(request: NextRequest) {
     console.error('Error deleting program:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete program' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }

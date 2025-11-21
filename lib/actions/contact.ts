@@ -1,10 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { Resource, Action } from '@/lib/permissions';
 import { formatApiError, logError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 export async function getContactSubmissions() {
   try {

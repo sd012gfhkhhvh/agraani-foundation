@@ -1,5 +1,5 @@
-import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { MetadataRoute } from 'next';
 
 export const revalidate = 86400; // Revalidate daily
 

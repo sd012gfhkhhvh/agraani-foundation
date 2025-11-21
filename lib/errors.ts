@@ -15,7 +15,10 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, public fields?: Record<string, string>) {
+  constructor(
+    message: string,
+    public fields?: Record<string, string>
+  ) {
     super(message, 400, 'VALIDATION_ERROR');
     this.name = 'ValidationError';
   }
@@ -74,7 +77,7 @@ export function formatApiError(error: unknown): {
   // Handle Prisma errors
   if (error && typeof error === 'object' && 'code' in error) {
     const prismaError = error as any;
-    
+
     // Unique constraint violation
     if (prismaError.code === 'P2002') {
       const field = prismaError.meta?.target?.[0] || 'field';
@@ -84,7 +87,7 @@ export function formatApiError(error: unknown): {
         code: 'DUPLICATE_ENTRY',
       };
     }
-    
+
     // Record not found
     if (prismaError.code === 'P2025') {
       return {
@@ -93,7 +96,7 @@ export function formatApiError(error: unknown): {
         code: 'NOT_FOUND',
       };
     }
-    
+
     // Foreign key constraint
     if (prismaError.code === 'P2003') {
       return {
@@ -114,7 +117,7 @@ export function formatApiError(error: unknown): {
         code: 'UNAUTHORIZED',
       };
     }
-    
+
     if (error.message.includes('Forbidden') || error.message.includes('permission')) {
       return {
         message: error.message,
@@ -143,13 +146,13 @@ export function formatApiError(error: unknown): {
  */
 export function getUserFriendlyMessage(error: unknown): string {
   const formatted = formatApiError(error);
-  
+
   // Map technical errors to user-friendly messages
   const friendlyMessages: Record<string, string> = {
     VALIDATION_ERROR: 'Please check your input and try again',
     UNAUTHORIZED: 'Please log in to continue',
-    FORBIDDEN: 'You don\'t have permission to do that',
-    NOT_FOUND: 'The item you\'re looking for doesn\'t exist',
+    FORBIDDEN: "You don't have permission to do that",
+    NOT_FOUND: "The item you're looking for doesn't exist",
     DUPLICATE_ENTRY: 'This item already exists',
     CONFLICT: 'This action conflicts with existing data',
     INTERNAL_ERROR: 'Something went wrong. Please try again later',
@@ -163,11 +166,14 @@ export function getUserFriendlyMessage(error: unknown): string {
  */
 export function logError(error: unknown, context?: Record<string, any>) {
   console.error('[Error]', {
-    error: error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : error,
+    error:
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : error,
     context,
     timestamp: new Date().toISOString(),
   });

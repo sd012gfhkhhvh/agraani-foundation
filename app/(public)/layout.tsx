@@ -1,11 +1,7 @@
-import { Header } from '@/components/public/header';
 import { Footer } from '@/components/public/footer';
+import { Header } from '@/components/public/header';
 
-export default function PublicLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />

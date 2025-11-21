@@ -1,12 +1,13 @@
-import { Metadata } from 'next';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, CreditCard, Building, Users, Shield, TrendingUp } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Building, CreditCard, Heart, Shield, TrendingUp, Users } from 'lucide-react';
+import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Donate - Agraani Welfare Foundation',
-  description: 'Support our mission to empower women and transform communities. Your donation makes a real difference.',
+  description:
+    'Support our mission to empower women and transform communities. Your donation makes a real difference.',
 };
 
 export default function DonatePage() {
@@ -23,18 +24,19 @@ export default function DonatePage() {
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 bg-linear-to-br from-accent via-secondary to-primary overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/plus.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center text-white">
             <Heart className="h-16 w-16 mx-auto mb-6 animate-pulse" />
-            
+
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Make a <span className="text-white/90">Difference</span>
             </h1>
             <p className="text-xl md:text-2xl opacity-90 leading-relaxed mb-8">
-              Your generous donation helps us empower women, educate children, and transform communities across West Bengal.
+              Your generous donation helps us empower women, educate children, and transform
+              communities across West Bengal.
             </p>
-            
+
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
               <Shield className="h-5 w-5" />
               <span className="font-medium">100% Secure & Tax Deductible (80G)</span>
@@ -78,7 +80,9 @@ export default function DonatePage() {
                 <h3 className="text-xl font-semibold mb-4 text-center">Or Enter Custom Amount</h3>
                 <div className="flex gap-4">
                   <div className="relative flex-1">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                      ₹
+                    </span>
                     <input
                       type="number"
                       placeholder="Enter amount"
@@ -129,9 +133,7 @@ export default function DonatePage() {
                   <CreditCard className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Online Payment</h3>
-                <p className="text-muted-foreground mb-4">
-                  Credit/Debit Card, UPI, Net Banking
-                </p>
+                <p className="text-muted-foreground mb-4">Credit/Debit Card, UPI, Net Banking</p>
                 <Button variant="outline" className="w-full">
                   Donate Online
                 </Button>
@@ -144,9 +146,7 @@ export default function DonatePage() {
                   <Building className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Bank Transfer</h3>
-                <p className="text-muted-foreground mb-4">
-                  Direct transfer to our account
-                </p>
+                <p className="text-muted-foreground mb-4">Direct transfer to our account</p>
                 <Link href="#bank-details">
                   <Button variant="outline" className="w-full">
                     View Details
@@ -161,9 +161,7 @@ export default function DonatePage() {
                   <Users className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Monthly Giving</h3>
-                <p className="text-muted-foreground mb-4">
-                  Become a sustaining supporter
-                </p>
+                <p className="text-muted-foreground mb-4">Become a sustaining supporter</p>
                 <Link href="/contact">
                   <Button variant="outline" className="w-full">
                     Learn More
@@ -187,7 +185,9 @@ export default function DonatePage() {
                 <div>
                   <h3 className="text-2xl font-bold mb-3">Tax Benefits Under 80G</h3>
                   <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                    All donations to Agraani Welfare Foundation are eligible for tax deduction under Section 80G of the Income Tax Act. You can claim up to 50% of your donation as a deduction from your taxable income.
+                    All donations to Agraani Welfare Foundation are eligible for tax deduction under
+                    Section 80G of the Income Tax Act. You can claim up to 50% of your donation as a
+                    deduction from your taxable income.
                   </p>
                   <p className="text-sm text-muted-foreground">
                     80G Registration No: AAAA1234B | Valid from FY 2023-24 onwards

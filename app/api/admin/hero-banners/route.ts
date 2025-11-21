@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(banners);
   } catch (error) {
     console.error('Error fetching hero banners:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch hero banners' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch hero banners' }, { status: 500 });
   }
 }
 
@@ -46,7 +43,14 @@ export async function POST(request: NextRequest) {
     console.error('Error creating hero banner:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create hero banner' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -68,7 +72,14 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating hero banner:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update hero banner' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -93,7 +104,14 @@ export async function DELETE(request: NextRequest) {
     console.error('Error deleting hero banner:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete hero banner' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }

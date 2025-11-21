@@ -1,19 +1,18 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { MediaType } from '@prisma/client';
 import { formatApiError, logError } from '@/lib/errors';
-import { Resource, Action } from '@/lib/permissions';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { MediaType } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get all gallery items
  */
-export async function getGalleryItems(activeOnly: boolean = true) {
+export async function getGalleryItems() {
   try {
     const items = await prisma.galleryItem.findMany({
-      where: activeOnly ? { isActive: true } : {},
       orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
     });
 
@@ -57,16 +56,19 @@ export async function createGalleryItem(data: {
 /**
  * Update a gallery item (requires EDITOR, CONTENT_ADMIN, or SUPER_ADMIN)
  */
-export async function updateGalleryItem(id: string, data: Partial<{
-  title: string;
-  description: string;
-  imageUrl: string;
-  videoUrl: string;
-  type: MediaType;
-  category: string;
-  order: number;
-  isActive: boolean;
-}>) {
+export async function updateGalleryItem(
+  id: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    imageUrl: string;
+    videoUrl: string;
+    type: MediaType;
+    category: string;
+    order: number;
+    isActive: boolean;
+  }>
+) {
   try {
     await requirePermission(Resource.GALLERY, Action.UPDATE);
 

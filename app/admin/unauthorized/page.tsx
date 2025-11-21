@@ -1,7 +1,7 @@
-"use client"
-import Link from 'next/link';
+'use client';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
 
 export default function UnauthorizedPage() {
   return (
@@ -19,7 +19,8 @@ export default function UnauthorizedPage() {
           Access Denied
         </h2>
         <p className="text-lg text-gray-600 mb-8 animate-fade-in">
-          You don't have permission to access this page. Please contact your administrator if you believe this is an error.
+          You don't have permission to access this page. Please contact your administrator if you
+          believe this is an error.
         </p>
 
         {/* Actions */}
@@ -30,11 +31,7 @@ export default function UnauthorizedPage() {
               Go to Dashboard
             </Button>
           </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => window.history.back()}
-          >
+          <Button size="lg" variant="outline" onClick={() => window.history.back()}>
             <ArrowLeft className="h-5 w-5 mr-2" />
             Go Back
           </Button>

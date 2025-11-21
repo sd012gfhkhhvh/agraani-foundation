@@ -1,10 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
 import { formatApiError, logError, NotFoundError } from '@/lib/errors';
-import { Resource, Action } from '@/lib/permissions';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get all blog posts (optionally include unpublished for admin)
@@ -61,10 +61,12 @@ export async function createBlogPost(data: {
     await requirePermission(Resource.BLOG_POSTS, Action.CREATE);
 
     // Generate slug from title if not provided
-    const slug = data.slug || data.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug =
+      data.slug ||
+      data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
 
     const post = await prisma.blogPost.create({
       data: {
@@ -88,17 +90,20 @@ export async function createBlogPost(data: {
 /**
  * Update a blog post (requires EDITOR, CONTENT_ADMIN, or SUPER_ADMIN)
  */
-export async function updateBlogPost(id: string, data: {
-  title?: string;
-  slug?: string;
-  excerpt?: string;
-  content?: string;
-  imageUrl?: string;
-  author?: string;
-  category?: string;
-  tags?: string[];
-  isPublished?: boolean;
-}) {
+export async function updateBlogPost(
+  id: string,
+  data: {
+    title?: string;
+    slug?: string;
+    excerpt?: string;
+    content?: string;
+    imageUrl?: string;
+    author?: string;
+    category?: string;
+    tags?: string[];
+    isPublished?: boolean;
+  }
+) {
   try {
     await requirePermission(Resource.BLOG_POSTS, Action.UPDATE);
 

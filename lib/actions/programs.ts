@@ -1,15 +1,14 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { Resource, Action } from '@/lib/permissions';
 import { formatApiError, logError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
-export async function getPrograms(activeOnly: boolean = true) {
+export async function getPrograms() {
   try {
     const programs = await prisma.program.findMany({
-      where: activeOnly ? { isActive: true } : {},
       orderBy: { order: 'asc' },
     });
     return { success: true, data: programs };
@@ -22,7 +21,7 @@ export async function getPrograms(activeOnly: boolean = true) {
 export async function createProgram(data: {
   title: string;
   slug: string;
- description: string;
+  description: string;
   imageUrl?: string;
   icon?: string;
   order?: number;
@@ -41,15 +40,18 @@ export async function createProgram(data: {
   }
 }
 
-export async function updateProgram(id: string, data: Partial<{
-  title: string;
-  slug: string;
-  description: string;
-  imageUrl: string;
-  icon: string;
-  order: number;
-  isActive: boolean;
-}>) {
+export async function updateProgram(
+  id: string,
+  data: Partial<{
+    title: string;
+    slug: string;
+    description: string;
+    imageUrl: string;
+    icon: string;
+    order: number;
+    isActive: boolean;
+  }>
+) {
   try {
     await requirePermission(Resource.PROGRAMS, Action.UPDATE);
     const program = await prisma.program.update({ where: { id }, data });

@@ -1,15 +1,14 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { Resource, Action } from '@/lib/permissions';
 import { formatApiError, logError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
-export async function getHeroBanners(activeOnly: boolean = true) {
+export async function getHeroBanners() {
   try {
     const banners = await prisma.heroBanner.findMany({
-      where: activeOnly ? { isActive: true } : {},
       orderBy: { order: 'asc' },
     });
     return { success: true, data: banners };
@@ -41,16 +40,19 @@ export async function createHeroBanner(data: {
   }
 }
 
-export async function updateHeroBanner(id: string, data: Partial<{
-  title: string;
-  subtitle: string;
-  description: string;
-  imageUrl: string;
-  ctaText: string;
-  ctaLink: string;
-  order: number;
-  isActive: boolean;
-}>) {
+export async function updateHeroBanner(
+  id: string,
+  data: Partial<{
+    title: string;
+    subtitle: string;
+    description: string;
+    imageUrl: string;
+    ctaText: string;
+    ctaLink: string;
+    order: number;
+    isActive: boolean;
+  }>
+) {
   try {
     await requirePermission(Resource.HERO_BANNERS, Action.UPDATE);
     const banner = await prisma.heroBanner.update({ where: { id }, data });

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCcw, Home } from 'lucide-react';
+import { AlertTriangle, Home, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function Error({
   error,
@@ -38,19 +38,13 @@ export default function Error({
         {/* Error Details (for development) */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-8 p-4 bg-muted rounded-lg text-left max-w-lg mx-auto">
-            <p className="text-sm font-mono text-destructive break-all">
-              {error.message}
-            </p>
+            <p className="text-sm font-mono text-destructive break-all">{error.message}</p>
           </div>
         )}
 
         {/* Actions */}
         <div className="flex flex-wrap gap-4 justify-center animate-fade-in">
-          <Button
-            size="lg"
-            onClick={reset}
-            className="btn-gradient-primary"
-          >
+          <Button size="lg" onClick={reset} className="btn-gradient-primary">
             <RefreshCcw className="h-5 w-5 mr-2" />
             Try Again
           </Button>

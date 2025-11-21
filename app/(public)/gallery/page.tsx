@@ -1,14 +1,15 @@
-import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Image as ImageIcon, Video, Filter } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { prisma } from '@/lib/prisma';
+import { Filter, Image as ImageIcon, Video } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Gallery - Agraani Welfare Foundation',
-  description: 'View our photo and video gallery showcasing our programs, events, and the impact of our work across West Bengal.',
+  description:
+    'View our photo and video gallery showcasing our programs, events, and the impact of our work across West Bengal.',
 };
 
 export default async function GalleryPage() {
@@ -18,26 +19,27 @@ export default async function GalleryPage() {
   });
 
   // Get unique categories
-  const categories = [...new Set(galleryItems.map(item => item.category).filter(Boolean))];
+  const categories = [...new Set(galleryItems.map((item) => item.category).filter(Boolean))];
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 bg-linear-to-br from-secondary via-primary to-accent overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
               <ImageIcon className="h-4 w-4" />
               <span className="text-sm font-medium">Our Impact in Pictures</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Photo & Video <span className="text-white/90">Gallery</span>
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-              Witness the transformative power of our programs through moments captured across communities
+              Witness the transformative power of our programs through moments captured across
+              communities
             </p>
           </div>
         </div>
@@ -72,7 +74,9 @@ export default async function GalleryPage() {
             <Card className="p-16 text-center">
               <ImageIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-2xl font-semibold mb-2">Gallery coming soon</h3>
-              <p className="text-muted-foreground">Check back to see photos and videos from our programs and events</p>
+              <p className="text-muted-foreground">
+                Check back to see photos and videos from our programs and events
+              </p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -121,9 +125,7 @@ export default async function GalleryPage() {
 
                     {/* Title Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-smooth">
-                      <h3 className="text-white font-semibold text-lg">
-                        {item.title}
-                      </h3>
+                      <h3 className="text-white font-semibold text-lg">{item.title}</h3>
                       {item.description && (
                         <p className="text-white/80 text-sm line-clamp-2 mt-1">
                           {item.description}
@@ -147,7 +149,10 @@ export default async function GalleryPage() {
           <p className="text-lg text-muted-foreground mb-8">
             Join us in creating more moments worth capturing. Get involved today.
           </p>
-          <a href="/contact" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-smooth font-medium">
+          <a
+            href="/contact"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-smooth font-medium"
+          >
             Get Involved
           </a>
         </div>

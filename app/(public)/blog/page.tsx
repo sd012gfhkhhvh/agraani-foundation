@@ -1,14 +1,15 @@
-import { Metadata } from 'next';
+import { Card, CardContent } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import { generateSEO } from '@/lib/seo';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
+import { ArrowRight, Calendar, User } from 'lucide-react';
+import { Metadata } from 'next';
 import Image from 'next/image';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata: Metadata = generateSEO({
   title: 'Blog & News',
-  description: 'Latest news, updates, and stories from Agraani Welfare Foundation. Read about our impact and community initiatives.',
+  description:
+    'Latest news, updates, and stories from Agraani Welfare Foundation. Read about our impact and community initiatives.',
   path: '/blog',
 });
 
@@ -49,12 +50,7 @@ export default async function BlogPage() {
               <Card key={post.id} className="hover:shadow-xl transition-shadow overflow-hidden">
                 {post.imageUrl && (
                   <div className="relative h-48">
-                    <Image
-                      src={post.imageUrl}
-                      alt={post.title}
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={post.imageUrl} alt={post.title} fill className="object-cover" />
                   </div>
                 )}
                 <CardContent className="p-6">
@@ -70,7 +66,7 @@ export default async function BlogPage() {
                   </div>
 
                   <h2 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h2>
-                  
+
                   {post.excerpt && (
                     <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
                   )}

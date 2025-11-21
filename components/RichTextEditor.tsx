@@ -1,18 +1,9 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Heading2,
-  Quote,
-  Undo,
-  Redo
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { Bold, Heading2, Italic, List, ListOrdered, Quote, Redo, Undo } from 'lucide-react';
 
 interface RichTextEditorProps {
   content: string;

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -25,7 +25,13 @@ export async function GET() {
     console.error('Error fetching users:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch users' },
-      { status: error.message?.includes('Unauthorized') ? 401 : error.message?.includes('Forbidden') ? 403 : 500 }
+      {
+        status: error.message?.includes('Unauthorized')
+          ? 401
+          : error.message?.includes('Forbidden')
+            ? 403
+            : 500,
+      }
     );
   }
 }
@@ -38,10 +44,7 @@ export async function PUT(request: NextRequest) {
     const { id, role } = data;
 
     if (!id || !role) {
-      return NextResponse.json(
-        { error: 'User ID and role are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID and role are required' }, { status: 400 });
     }
 
     const user = await prisma.user.update({
@@ -60,7 +63,13 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating user:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update user' },
-      { status: error.message?.includes('Unauthorized') ? 401 : error.message?.includes('Forbidden') ? 403 : 500 }
+      {
+        status: error.message?.includes('Unauthorized')
+          ? 401
+          : error.message?.includes('Forbidden')
+            ? 403
+            : 500,
+      }
     );
   }
 }

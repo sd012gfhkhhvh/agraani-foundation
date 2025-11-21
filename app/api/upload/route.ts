@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { requireRole } from '@/lib/auth-utils';
 import { UserRole } from '@prisma/client';
+import { mkdir, writeFile } from 'fs/promises';
+import { NextRequest, NextResponse } from 'next/server';
+import { join } from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +37,14 @@ export async function POST(request: NextRequest) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to upload file' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }

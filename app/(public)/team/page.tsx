@@ -1,13 +1,14 @@
-import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Phone, Linkedin, Twitter, Users2, Heart } from 'lucide-react';
+import { prisma } from '@/lib/prisma';
+import { Heart, Linkedin, Mail, Phone, Users2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Our Team - Agraani Welfare Foundation',
-  description: 'Meet the dedicated team behind Agraani Welfare Foundation working to empower women and transform communities.',
+  description:
+    'Meet the dedicated team behind Agraani Welfare Foundation working to empower women and transform communities.',
 };
 
 export default async function TeamPage() {
@@ -21,19 +22,20 @@ export default async function TeamPage() {
       {/* Hero Section */}
       <section className="relative py-20 bg-linear-to-br from-primary to-accent overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/hexagons.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
               <Heart className="h-4 w-4 text-secondary" />
               <span className="text-sm font-medium">Led by Passion, Driven by Purpose</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Meet Our <span className="text-secondary">Team</span>
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-              Dedicated professionals committed to creating lasting change in communities across West Bengal
+              Dedicated professionals committed to creating lasting change in communities across
+              West Bengal
             </p>
           </div>
         </div>
@@ -46,7 +48,9 @@ export default async function TeamPage() {
             <Card className="p-16 text-center">
               <Users2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-2xl font-semibold mb-2">Our team information is coming soon</h3>
-              <p className="text-muted-foreground">Check back to learn more about the people driving our mission</p>
+              <p className="text-muted-foreground">
+                Check back to learn more about the people driving our mission
+              </p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -66,12 +70,12 @@ export default async function TeamPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
-                  
+
                     {/* Social Links Overlay */}
                     {(member.email || member.phone || member.linkedIn) && (
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-smooth">
                         {member.email && (
-                          <a 
+                          <a
                             href={`mailto:${member.email}`}
                             className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-smooth"
                           >
@@ -79,7 +83,7 @@ export default async function TeamPage() {
                           </a>
                         )}
                         {member.phone && (
-                          <a 
+                          <a
                             href={`tel:${member.phone}`}
                             className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-smooth"
                           >
@@ -87,7 +91,7 @@ export default async function TeamPage() {
                           </a>
                         )}
                         {member.linkedIn && (
-                          <a 
+                          <a
                             href={member.linkedIn}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -96,7 +100,6 @@ export default async function TeamPage() {
                             <Linkedin className="h-5 w-5 text-primary" />
                           </a>
                         )}
-
                       </div>
                     )}
                   </div>
@@ -125,9 +128,13 @@ export default async function TeamPage() {
             Join Our <span className="text-gradient-primary">Mission</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            We're always looking for passionate individuals who want to make a difference. Get in touch to learn about opportunities.
+            We're always looking for passionate individuals who want to make a difference. Get in
+            touch to learn about opportunities.
           </p>
-          <a href="/contact" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-smooth font-medium">
+          <a
+            href="/contact"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-smooth font-medium"
+          >
             <Mail className="h-5 w-5" />
             Contact Us
           </a>

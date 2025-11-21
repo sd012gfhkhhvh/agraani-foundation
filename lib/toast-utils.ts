@@ -14,7 +14,7 @@ export const toastMessages = {
     published: (item: string) => `${item} published successfully`,
     submitted: (item: string) => `${item} submitted successfully`,
   },
-  
+
   // Error messages
   error: {
     load: (item: string) => `Failed to load ${item}`,
@@ -27,7 +27,7 @@ export const toastMessages = {
     forbidden: 'You do not have permission to perform this action',
     validation: 'Please check your input and try again',
   },
-  
+
   // Info messages
   info: {
     loading: (item: string) => `Loading ${item}...`,

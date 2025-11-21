@@ -1,25 +1,25 @@
-import { redirect } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 import { auth, signOut } from '@/lib/auth';
+import { getRoleBadgeColor, getRoleDisplayName } from '@/lib/permissions';
+import {
+  Briefcase,
+  ExternalLink,
+  FileText,
+  Image,
+  ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Newspaper,
+  Scale,
+  Settings,
+  Target,
+  Users,
+} from 'lucide-react';
 import { SessionProvider } from 'next-auth/react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Toaster } from 'sonner';
-import {
-  LayoutDashboard,
-  Image,
-  FileText,
-  Users,
-  Briefcase,
-  Target,
-  Scale,
-  ImageIcon,
-  Newspaper,
-  Mail,
-  LogOut,
-  Settings,
-  ExternalLink,
-} from 'lucide-react';
-import { getRoleBadgeColor, getRoleDisplayName } from '@/lib/permissions';
-import { Badge } from '@/components/ui/badge';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -35,11 +35,7 @@ const navigation = [
   { name: 'Users', href: '/admin/users', icon: Settings, requireSuperAdmin: true },
 ];
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -49,9 +45,7 @@ export default async function AdminLayout({
   const userRole = (session.user as any).role;
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
 
-  const filteredNav = navigation.filter(
-    (item) => !item.requireSuperAdmin || isSuperAdmin
-  );
+  const filteredNav = navigation.filter((item) => !item.requireSuperAdmin || isSuperAdmin);
 
   return (
     <SessionProvider session={session}>
@@ -96,7 +90,9 @@ export default async function AdminLayout({
             <div className="p-4 border-t border-gray-800/50 bg-gray-950/50">
               <div className="mb-3 px-4 py-3 bg-gray-800/30 rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm font-semibold text-white truncate">{session.user.name || 'Admin'}</div>
+                  <div className="text-sm font-semibold text-white truncate">
+                    {session.user.name || 'Admin'}
+                  </div>
                   <Badge className={getRoleBadgeColor(userRole)} variant="outline">
                     {getRoleDisplayName(userRole)}
                   </Badge>
@@ -128,7 +124,10 @@ export default async function AdminLayout({
             <div className="px-8 py-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Welcome back, <span className="font-semibold text-gray-900">{session.user.name || 'Admin'}</span>
+                  Welcome back,{' '}
+                  <span className="font-semibold text-gray-900">
+                    {session.user.name || 'Admin'}
+                  </span>
                 </div>
                 <Link
                   href="/"
@@ -143,11 +142,9 @@ export default async function AdminLayout({
           </header>
 
           {/* Page Content */}
-          <main className="p-8">
-            {children}
-          </main>
+          <main className="p-8">{children}</main>
         </div>
-        
+
         <Toaster richColors position="top-right" />
       </div>
     </SessionProvider>

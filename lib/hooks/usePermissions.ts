@@ -1,8 +1,8 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { Resource, canManageUsers, getResourcePermissions } from '@/lib/permissions';
 import { UserRole } from '@prisma/client';
-import { Resource, getResourcePermissions, canManageUsers } from '@/lib/permissions';
+import { useSession } from 'next-auth/react';
 
 /**
  * Client-side hook for checking user permissions

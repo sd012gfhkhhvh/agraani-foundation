@@ -1,11 +1,11 @@
-import { Metadata } from 'next';
+import { Button } from '@/components/ui/button';
 import { prisma } from '@/lib/prisma';
-import { notFound } from 'next/navigation';
 import { generateSEO } from '@/lib/seo';
-import { Calendar, User, Tag } from 'lucide-react';
+import { Calendar, Tag, User } from 'lucide-react';
+import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { notFound } from 'next/navigation';
 
 interface BlogPostPageProps {
   params: { slug: string };
@@ -54,7 +54,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <Link href="/blog" className="text-primary hover:underline mb-4 inline-block">
             ← Back to Blog
           </Link>
-          
+
           <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
 
           <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-6">
@@ -88,18 +88,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Featured Image */}
         {post.imageUrl && (
           <div className="relative h-96 mb-8 rounded-xl overflow-hidden">
-            <Image
-              src={post.imageUrl}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image src={post.imageUrl} alt={post.title} fill className="object-cover" priority />
           </div>
         )}
 
         {/* Content */}
-        <div 
+        <div
           className="prose prose-lg max-w-none mb-12"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />

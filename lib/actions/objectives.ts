@@ -1,15 +1,14 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { Resource, Action } from '@/lib/permissions';
 import { formatApiError, logError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
-export async function getObjectives(activeOnly: boolean = true) {
+export async function getObjectives() {
   try {
     const objectives = await prisma.objective.findMany({
-      where: activeOnly ? { isActive: true } : {},
       orderBy: { order: 'asc' },
     });
     return { success: true, data: objectives };
@@ -37,12 +36,15 @@ export async function createObjective(data: {
   }
 }
 
-export async function updateObjective(id: string, data: Partial<{
-  title: string;
-  description: string;
-  order: number;
-  isActive: boolean;
-}>) {
+export async function updateObjective(
+  id: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    order: number;
+    isActive: boolean;
+  }>
+) {
   try {
     await requirePermission(Resource.OBJECTIVES, Action.UPDATE);
     const objective = await prisma.objective.update({ where: { id }, data });

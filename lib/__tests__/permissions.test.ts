@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { hasPermission, getPermissionDescription, Resource, Action } from '@/lib/permissions';
+import { Action, getPermissionDescription, hasPermission, Resource } from '@/lib/permissions';
 import { UserRole } from '@prisma/client';
+import { describe, expect, it } from 'vitest';
 
 /**
  * Permission Test Utilities
- * 
+ *
  * These tests verify that the RBAC permission matrix is correctly configured
  * and that all roles have appropriate access levels.
  */
@@ -12,14 +12,17 @@ import { UserRole } from '@prisma/client';
 describe('RBAC Permission System', () => {
   describe('Permission Descriptions', () => {
     it('should generate human-readable permission descriptions', () => {
-      expect(getPermissionDescription(Resource.GALLERY, Action.CREATE))
-        .toBe('create gallery items');
-      
-      expect(getPermissionDescription(Resource.USERS, Action.MANAGE_ROLES))
-        .toBe('manage roles for users');
-      
-      expect(getPermissionDescription(Resource.BLOG_POSTS, Action.UPDATE))
-        .toBe('update blog posts');
+      expect(getPermissionDescription(Resource.GALLERY, Action.CREATE)).toBe(
+        'create gallery items'
+      );
+
+      expect(getPermissionDescription(Resource.USERS, Action.MANAGE_ROLES)).toBe(
+        'manage roles for users'
+      );
+
+      expect(getPermissionDescription(Resource.BLOG_POSTS, Action.UPDATE)).toBe(
+        'update blog posts'
+      );
     });
   });
 
@@ -38,7 +41,7 @@ describe('RBAC Permission System', () => {
         Resource.LEGAL_DOCUMENTS,
       ];
 
-      resources.forEach(resource => {
+      resources.forEach((resource) => {
         expect(hasPermission(role, resource, Action.VIEW)).toBe(true);
         expect(hasPermission(role, resource, Action.CREATE)).toBe(true);
         expect(hasPermission(role, resource, Action.UPDATE)).toBe(true);
@@ -90,7 +93,7 @@ describe('RBAC Permission System', () => {
         Resource.OBJECTIVES,
       ];
 
-      resources.forEach(resource => {
+      resources.forEach((resource) => {
         expect(hasPermission(role, resource, Action.VIEW)).toBe(true);
         expect(hasPermission(role, resource, Action.CREATE)).toBe(true);
         expect(hasPermission(role, resource, Action.UPDATE)).toBe(true);
@@ -126,7 +129,7 @@ describe('RBAC Permission System', () => {
         Resource.LEGAL_DOCUMENTS,
       ];
 
-      resources.forEach(resource => {
+      resources.forEach((resource) => {
         expect(hasPermission(role, resource, Action.VIEW)).toBe(true);
         expect(hasPermission(role, resource, Action.CREATE)).toBe(false);
         expect(hasPermission(role, resource, Action.UPDATE)).toBe(false);
@@ -155,7 +158,7 @@ describe('RBAC Permission System', () => {
     it('should deny permissions for all roles on resources without explicit grants', () => {
       // Test that VIEWER can't create anything
       expect(hasPermission(UserRole.VIEWER, Resource.GALLERY, Action.CREATE)).toBe(false);
-      
+
       // Test that EDITOR can't delete
       expect(hasPermission(UserRole.EDITOR, Resource.LEGAL_DOCUMENTS, Action.DELETE)).toBe(false);
     });
@@ -166,12 +169,12 @@ describe('RBAC Permission System', () => {
       const roles = [UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN, UserRole.EDITOR];
       const resources = Object.values(Resource);
 
-      roles.forEach(role => {
-        resources.forEach(resource => {
+      roles.forEach((role) => {
+        resources.forEach((resource) => {
           const canCreate = hasPermission(role, resource, Action.CREATE);
           const canUpdate = hasPermission(role, resource, Action.UPDATE);
           const canDelete = hasPermission(role, resource, Action.DELETE);
-          
+
           // If any mutating action is allowed, VIEW should also be allowed
           if (canCreate || canUpdate || canDelete) {
             expect(hasPermission(role, resource, Action.VIEW)).toBe(true);
@@ -182,12 +185,12 @@ describe('RBAC Permission System', () => {
 
     it('should enforce deletion hierarchy (DELETE implies UPDATE)', () => {
       const roles = [UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN];
-      const resources = Object.values(Resource).filter(r => r !== Resource.USERS);
+      const resources = Object.values(Resource).filter((r) => r !== Resource.USERS);
 
-      roles.forEach(role => {
-        resources.forEach(resource => {
+      roles.forEach((role) => {
+        resources.forEach((resource) => {
           const canDelete = hasPermission(role, resource, Action.DELETE);
-          
+
           // If DELETE is allowed, UPDATE should also be allowed
           if (canDelete) {
             expect(hasPermission(role, resource, Action.UPDATE)).toBe(true);

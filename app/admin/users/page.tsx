@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { RoleBadge } from '@/components/admin/RoleBadge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, User, Edit2, Clock, AlertTriangle } from 'lucide-react';
-import { RoleBadge } from '@/components/admin/RoleBadge';
-import { LoadingCard } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
-import { UserRole } from '@prisma/client';
+import { LoadingCard } from '@/components/ui/loading';
 import { getUsers, updateUserRole } from '@/lib/actions';
-import { showSuccess, showError, showPromiseToast } from '@/lib/toast-utils';
 import { useCanManageUsers } from '@/lib/hooks/usePermissions';
+import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { UserRole } from '@prisma/client';
+import { AlertTriangle, Clock, Edit2, Shield, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface AdminUser {
   id: string;
@@ -29,7 +29,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.VIEWER);
-  
+
   const { canManageUsers, isLoading: permCheck } = useCanManageUsers();
   const router = useRouter();
 
@@ -91,11 +91,13 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gradient-primary">User Management</h1>
-        <p className="text-muted-foreground mt-1">Manage user roles and permissions (Super Admin Only)</p>
+        <p className="text-muted-foreground mt-1">
+          Manage user roles and permissions (Super Admin Only)
+        </p>
       </div>
 
       {users.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={User}
           title="No users found"
           description="No users have been created yet."
@@ -109,9 +111,9 @@ export default function UsersPage() {
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       {user.image ? (
-                        <img 
-                          src={user.image} 
-                          alt={user.name || 'User'} 
+                        <img
+                          src={user.image}
+                          alt={user.name || 'User'}
                           className="h-12 w-12 rounded-full object-cover"
                         />
                       ) : (
@@ -160,11 +162,7 @@ export default function UsersPage() {
                         >
                           Save
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingUser(null)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => setEditingUser(null)}>
                           Cancel
                         </Button>
                       </div>

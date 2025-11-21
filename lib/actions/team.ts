@@ -1,18 +1,17 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { Resource, Action } from '@/lib/permissions';
 import { formatApiError, logError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get all team members
  */
-export async function getTeamMembers(activeOnly: boolean = true) {
+export async function getTeamMembers() {
   try {
     const members = await prisma.teamMember.findMany({
-      where: activeOnly ? { isActive: true } : {},
       orderBy: { order: 'asc' },
     });
 
@@ -57,17 +56,20 @@ export async function createTeamMember(data: {
 /**
  * Update a team member (requires EDITOR, CONTENT_ADMIN, or SUPER_ADMIN)
  */
-export async function updateTeamMember(id: string, data: Partial<{
-  name: string;
-  position: string;
-  bio: string;
-  imageUrl: string;
-  email: string;
-  phone: string;
-  linkedIn: string;
-  order: number;
-  isActive: boolean;
-}>) {
+export async function updateTeamMember(
+  id: string,
+  data: Partial<{
+    name: string;
+    position: string;
+    bio: string;
+    imageUrl: string;
+    email: string;
+    phone: string;
+    linkedIn: string;
+    order: number;
+    isActive: boolean;
+  }>
+) {
   try {
     await requirePermission(Resource.TEAM_MEMBERS, Action.UPDATE);
 

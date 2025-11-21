@@ -1,10 +1,10 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Facebook, Youtube, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: 'Home', href: '/' },

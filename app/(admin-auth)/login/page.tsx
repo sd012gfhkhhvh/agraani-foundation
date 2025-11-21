@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { auth, signIn } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export default async function AdminLoginPage({
   searchParams,
@@ -26,8 +26,8 @@ export default async function AdminLoginPage({
 
         {params.error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-            {params.error === 'unauthorized' 
-              ? 'You do not have permission to access the admin panel.' 
+            {params.error === 'unauthorized'
+              ? 'You do not have permission to access the admin panel.'
               : 'Authentication failed. Please try again.'}
           </div>
         )}

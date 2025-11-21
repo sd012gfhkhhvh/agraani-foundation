@@ -1,20 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye, EyeOff, Calendar } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
+import { Textarea } from '@/components/ui/textarea';
+import { createBlogPost, deleteBlogPost, getBlogPosts, updateBlogPost } from '@/lib/actions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { getBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost } from '@/lib/actions';
-import { showSuccess, showError, showPromiseToast } from '@/lib/toast-utils';
+import { Resource } from '@/lib/permissions';
+import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { Calendar, Edit, Eye, EyeOff, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface BlogPost {
   id: string;
@@ -128,7 +128,7 @@ export default function BlogPage() {
   const removeTag = (tag: string) => {
     setCurrentPost({
       ...currentPost,
-      tags: currentPost.tags?.filter(t => t !== tag) || [],
+      tags: currentPost.tags?.filter((t) => t !== tag) || [],
     });
   };
 
@@ -141,13 +141,15 @@ export default function BlogPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gradient-primary">Blog & News</h1>
-          <p className="text-muted-foreground mt-1">Create and manage blog posts and news updates</p>
+          <p className="text-muted-foreground mt-1">
+            Create and manage blog posts and news updates
+          </p>
         </div>
         <PermissionGate resource={Resource.BLOG_POSTS} action="create">
-          <Button 
-            onClick={() => { 
-              setIsEditing(true); 
-              setCurrentPost({ tags: [], isPublished: false }); 
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+              setCurrentPost({ tags: [], isPublished: false });
             }}
             className="btn-gradient-primary"
           >
@@ -160,9 +162,7 @@ export default function BlogPage() {
       {isEditing && (
         <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
           <CardHeader className="bg-linear-to-r from-primary/5 to-transparent">
-            <CardTitle>
-              {currentPost.id ? 'Edit Post' : 'Create New Post'}
-            </CardTitle>
+            <CardTitle>{currentPost.id ? 'Edit Post' : 'Create New Post'}</CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div>
@@ -181,7 +181,9 @@ export default function BlogPage() {
                 onChange={(e) => setCurrentPost({ ...currentPost, slug: e.target.value })}
                 placeholder="auto-generated-from-title"
               />
-              <p className="text-xs text-muted-foreground mt-1">Leave blank to auto-generate from title</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave blank to auto-generate from title
+              </p>
             </div>
 
             <div>
@@ -246,7 +248,12 @@ export default function BlogPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {currentPost.tags?.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => removeTag(tag)}
+                  >
                     {tag} ×
                   </Badge>
                 ))}
@@ -261,21 +268,26 @@ export default function BlogPage() {
                 className="w-4 h-4 text-primary rounded focus:ring-primary"
               />
               <label className="text-sm font-medium">
-                {currentPost.isPublished ? 'Published (visible on website)' : 'Draft (not published)'}
+                {currentPost.isPublished
+                  ? 'Published (visible on website)'
+                  : 'Draft (not published)'}
               </label>
             </div>
 
             <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 disabled={isSaving || !permissions.canUpdate}
                 className="btn-gradient-primary"
               >
                 {isSaving ? 'Saving...' : currentPost.id ? 'Update Post' : 'Create Post'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => { setIsEditing(false); setCurrentPost({ tags: [], isPublished: false }); }}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentPost({ tags: [], isPublished: false });
+                }}
                 disabled={isSaving}
               >
                 Cancel
@@ -288,7 +300,7 @@ export default function BlogPage() {
       {/* Posts List */}
       <div className="grid gap-4">
         {posts.length === 0 ? (
-          <EmptyState 
+          <EmptyState
             icon={Calendar}
             title="No blog posts yet"
             description="Create your first post to get started"
@@ -311,14 +323,16 @@ export default function BlogPage() {
                       <h3 className="text-xl font-semibold">{post.title}</h3>
                       <Badge variant={post.isPublished ? 'default' : 'secondary'}>
                         {post.isPublished ? (
-                          <><Eye className="h-3 w-3 mr-1" /> Published</>
+                          <>
+                            <Eye className="h-3 w-3 mr-1" /> Published
+                          </>
                         ) : (
-                          <><EyeOff className="h-3 w-3 mr-1" /> Draft</>
+                          <>
+                            <EyeOff className="h-3 w-3 mr-1" /> Draft
+                          </>
                         )}
                       </Badge>
-                      {post.category && (
-                        <Badge variant="outline">{post.category}</Badge>
-                      )}
+                      {post.category && <Badge variant="outline">{post.category}</Badge>}
                     </div>
 
                     {post.excerpt && (
@@ -333,8 +347,10 @@ export default function BlogPage() {
                         <>
                           <span>•</span>
                           <div className="flex gap-1">
-                            {post.tags.slice(0, 3).map(tag => (
-                              <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                            {post.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
                             ))}
                           </div>
                         </>
@@ -347,17 +363,16 @@ export default function BlogPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => { setCurrentPost(post); setIsEditing(true); }}
+                        onClick={() => {
+                          setCurrentPost(post);
+                          setIsEditing(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource={Resource.BLOG_POSTS} action="delete">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(post.id)}
-                      >
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(post.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </PermissionGate>

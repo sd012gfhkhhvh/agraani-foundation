@@ -1,15 +1,16 @@
-import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { prisma } from '@/lib/prisma';
+import { ArrowRight, Book, Heart, Sparkles, Users } from 'lucide-react';
+import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Book, Users, Heart, Sparkles } from 'lucide-react';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Our Programs - Agraani Welfare Foundation',
-  description: 'Explore our comprehensive programs focused on women empowerment, education, and community development.',
+  description:
+    'Explore our comprehensive programs focused on women empowerment, education, and community development.',
 };
 
 export default async function ProgramsPage() {
@@ -23,19 +24,20 @@ export default async function ProgramsPage() {
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 bg-linear-to-br from-primary via-primary/90 to-accent overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/topography.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
               <Sparkles className="h-4 w-4 text-secondary" />
               <span className="text-sm font-medium">Creating Lasting Impact</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Our <span className="text-secondary">Programs</span>
             </h1>
             <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
-              Comprehensive initiatives designed to empower women and transform communities through education, skill development, and sustainable livelihood opportunities.
+              Comprehensive initiatives designed to empower women and transform communities through
+              education, skill development, and sustainable livelihood opportunities.
             </p>
           </div>
         </div>
@@ -53,7 +55,10 @@ export default async function ProgramsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {programs.map((program, index) => (
-                <Card key={program.id} className="card-hover group overflow-hidden h-full flex flex-col">
+                <Card
+                  key={program.id}
+                  className="card-hover group overflow-hidden h-full flex flex-col"
+                >
                   {/* Image Section */}
                   <div className="relative h-56 overflow-hidden bg-linear-to-br from-primary/20 to-secondary/20">
                     {program.imageUrl ? (
@@ -68,7 +73,7 @@ export default async function ProgramsPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
-                    
+
                     {/* Number Badge */}
                     <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white flex items-center justify-center font-bold text-primary text-xl shadow-lg">
                       {(index + 1).toString().padStart(2, '0')}
@@ -76,9 +81,7 @@ export default async function ProgramsPage() {
 
                     {/* Title Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h3 className="text-2xl font-bold text-white mb-1">
-                        {program.title}
-                      </h3>
+                      <h3 className="text-2xl font-bold text-white mb-1">{program.title}</h3>
                     </div>
                   </div>
 
@@ -90,8 +93,8 @@ export default async function ProgramsPage() {
 
                     {/* Action Button */}
                     <Link href="/contact">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-smooth"
                       >
                         <Heart className="h-4 w-4 mr-2" />
@@ -116,7 +119,8 @@ export default async function ProgramsPage() {
                 Making a <span className="text-gradient-primary">Real Difference</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                Our programs are designed with community input and driven by measurable outcomes. We work hand-in-hand with local leaders to ensure sustainable, long-term impact.
+                Our programs are designed with community input and driven by measurable outcomes. We
+                work hand-in-hand with local leaders to ensure sustainable, long-term impact.
               </p>
               <ul className="space-y-4">
                 {[

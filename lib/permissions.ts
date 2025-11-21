@@ -44,7 +44,7 @@ const PERMISSIONS: Record<UserRole, Partial<Record<Resource, Action[]>>> = {
     [Resource.USERS]: [Action.VIEW, Action.UPDATE, Action.MANAGE_ROLES],
     [Resource.DASHBOARD]: [Action.VIEW],
   },
-  
+
   [UserRole.CONTENT_ADMIN]: {
     // Content Admin can manage all content but not users
     [Resource.HERO_BANNERS]: [Action.VIEW, Action.CREATE, Action.UPDATE, Action.DELETE],
@@ -58,7 +58,7 @@ const PERMISSIONS: Record<UserRole, Partial<Record<Resource, Action[]>>> = {
     [Resource.CONTACT_SUBMISSIONS]: [Action.VIEW, Action.UPDATE, Action.DELETE],
     [Resource.DASHBOARD]: [Action.VIEW],
   },
-  
+
   [UserRole.EDITOR]: {
     // Editor can create and update content but not delete
     [Resource.HERO_BANNERS]: [Action.VIEW, Action.CREATE, Action.UPDATE],
@@ -72,7 +72,7 @@ const PERMISSIONS: Record<UserRole, Partial<Record<Resource, Action[]>>> = {
     [Resource.CONTACT_SUBMISSIONS]: [Action.VIEW],
     [Resource.DASHBOARD]: [Action.VIEW],
   },
-  
+
   [UserRole.VIEWER]: {
     // Viewer can only view, no modifications
     [Resource.HERO_BANNERS]: [Action.VIEW],
@@ -87,7 +87,6 @@ const PERMISSIONS: Record<UserRole, Partial<Record<Resource, Action[]>>> = {
     [Resource.DASHBOARD]: [Action.VIEW],
   },
 };
-
 
 /**
  * Get human-readable action verb
@@ -140,13 +139,13 @@ export function hasPermission(
   action: Action
 ): boolean {
   if (!role) return false;
-  
+
   const rolePermissions = PERMISSIONS[role];
   if (!rolePermissions) return false;
-  
+
   const resourcePermissions = rolePermissions[resource];
   if (!resourcePermissions) return false;
-  
+
   return resourcePermissions.includes(action);
 }
 

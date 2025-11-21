@@ -1,13 +1,14 @@
-import { Metadata } from 'next';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, Send, Clock } from 'lucide-react';
+import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contact Us - Agraani Welfare Foundation',
-  description: 'Get in touch with Agraani Welfare Foundation. We\'d love to hear from you about partnerships, volunteering, or general inquiries.',
+  description:
+    "Get in touch with Agraani Welfare Foundation. We'd love to hear from you about partnerships, volunteering, or general inquiries.",
 };
 
 export default function ContactPage() {
@@ -16,7 +17,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="relative py-20 bg-linear-to-br from-primary to-secondary overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -40,7 +41,8 @@ export default function ContactPage() {
                   Let's <span className="text-gradient-primary">Connect</span>
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Whether you're interested in partnering with us, volunteering, or simply want to learn more about our work, we're here to help.
+                  Whether you're interested in partnering with us, volunteering, or simply want to
+                  learn more about our work, we're here to help.
                 </p>
               </div>
 
@@ -81,9 +83,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Visit Us</h3>
-                      <p className="text-muted-foreground">
-                        Kolkata, West Bengal, India
-                      </p>
+                      <p className="text-muted-foreground">Kolkata, West Bengal, India</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -95,9 +95,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Office Hours</h3>
-                      <p className="text-muted-foreground">
-                        Monday - Friday: 9:00 AM - 6:00 PM
-                      </p>
+                      <p className="text-muted-foreground">Monday - Friday: 9:00 AM - 6:00 PM</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -108,7 +106,7 @@ export default function ContactPage() {
             <Card className="shadow-xl">
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
-                
+
                 <form action="/api/contact" method="POST" className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -181,10 +179,7 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full btn-gradient-primary text-lg py-6"
-                  >
+                  <Button type="submit" className="w-full btn-gradient-primary text-lg py-6">
                     <Send className="h-5 w-5 mr-2" />
                     Send Message
                   </Button>

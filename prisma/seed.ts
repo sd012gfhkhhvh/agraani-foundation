@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, MediaType } from '@prisma/client';
+import { MediaType, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,8 @@ async function main() {
       {
         title: 'Empowering Women Through Education',
         subtitle: 'Building a brighter future for West Bengal',
-        description: 'Agraani Welfare Foundation mobilizes communities for girls\' education and skill training in rural and educationally marginalized areas.',
+        description:
+          "Agraani Welfare Foundation mobilizes communities for girls' education and skill training in rural and educationally marginalized areas.",
         imageUrl: '/images/hero/hero-1.jpg',
         ctaText: 'Learn More',
         ctaLink: '/about',
@@ -32,7 +33,8 @@ async function main() {
       {
         title: 'Skill Training & Guaranteed Placement',
         subtitle: 'Transforming lives through vocational education',
-        description: 'We provide comprehensive skill training followed by guaranteed employment opportunities.',
+        description:
+          'We provide comprehensive skill training followed by guaranteed employment opportunities.',
         imageUrl: '/images/hero/hero-2.jpg',
         ctaText: 'Our Programs',
         ctaLink: '/programs',
@@ -42,7 +44,8 @@ async function main() {
       {
         title: 'Supporting Rural Communities',
         subtitle: 'Healthcare, education, and development',
-        description: 'Working extensively to improve quality education, healthcare access, and community development.',
+        description:
+          'Working extensively to improve quality education, healthcare access, and community development.',
         imageUrl: '/images/hero/hero-3.jpg',
         ctaText: 'Get Involved',
         ctaLink: '/contact',
@@ -58,13 +61,15 @@ async function main() {
       {
         section: 'who-we-are',
         title: 'Who We Are',
-        content: 'Agraani Welfare Foundation is an organization focused on Women and Child Education, Training & Development, and enabling self-dependence. We are committed to creating lasting positive impact in the lives of marginalized communities across West Bengal.',
+        content:
+          'Agraani Welfare Foundation is an organization focused on Women and Child Education, Training & Development, and enabling self-dependence. We are committed to creating lasting positive impact in the lives of marginalized communities across West Bengal.',
         imageUrl: '/images/about/who-we-are.jpg',
       },
       {
         section: 'about-us',
         title: 'About Us',
-        content: 'Agraani Welfare Foundation mobilizes communities for girls\' education and skill training in rural and educationally marginalized areas of West Bengal. We are aligned with Utkarsha Bangla Prakalpa, Samagra Shiksha, Skill India Mission, and the National Education Policy. Our work focuses on improving access to quality education & training for girls and women, child development and educational support, skill training followed by guaranteed placement, supporting impoverished people with medical needs, promoting local rural talent, and providing personal home-care assistant services for senior citizens.',
+        content:
+          "Agraani Welfare Foundation mobilizes communities for girls' education and skill training in rural and educationally marginalized areas of West Bengal. We are aligned with Utkarsha Bangla Prakalpa, Samagra Shiksha, Skill India Mission, and the National Education Policy. Our work focuses on improving access to quality education & training for girls and women, child development and educational support, skill training followed by guaranteed placement, supporting impoverished people with medical needs, promoting local rural talent, and providing personal home-care assistant services for senior citizens.",
         imageUrl: '/images/about/about-us.jpg',
       },
     ],
@@ -76,7 +81,8 @@ async function main() {
       {
         title: 'Women & Child Education',
         slug: 'women-child-education',
-        description: 'Improving access to quality education & training for girls and women in rural and marginalized areas. We work to ensure every girl has the opportunity to receive quality education and develop essential life skills.',
+        description:
+          'Improving access to quality education & training for girls and women in rural and marginalized areas. We work to ensure every girl has the opportunity to receive quality education and develop essential life skills.',
         imageUrl: '/images/programs/education.jpg',
         icon: 'BookOpen',
         order: 1,
@@ -85,7 +91,8 @@ async function main() {
       {
         title: 'Skill Training & Development',
         slug: 'skill-training',
-        description: 'Comprehensive vocational training programs followed by guaranteed placement opportunities. We equip individuals with market-relevant skills to ensure sustainable employment and economic independence.',
+        description:
+          'Comprehensive vocational training programs followed by guaranteed placement opportunities. We equip individuals with market-relevant skills to ensure sustainable employment and economic independence.',
         imageUrl: '/images/programs/training.jpg',
         icon: 'GraduationCap',
         order: 2,
@@ -94,7 +101,8 @@ async function main() {
       {
         title: 'Child Development Support',
         slug: 'child-development',
-        description: 'Child development and educational support programs to nurture young minds. We provide holistic development opportunities including academic support, extracurricular activities, and health services.',
+        description:
+          'Child development and educational support programs to nurture young minds. We provide holistic development opportunities including academic support, extracurricular activities, and health services.',
         imageUrl: '/images/programs/child-development.jpg',
         icon: 'Heart',
         order: 3,
@@ -103,7 +111,8 @@ async function main() {
       {
         title: 'Healthcare for Impoverished Communities',
         slug: 'healthcare',
-        description: 'Supporting impoverished people with medical needs and healthcare access. We organize health camps, provide medical assistance, and ensure access to basic healthcare services.',
+        description:
+          'Supporting impoverished people with medical needs and healthcare access. We organize health camps, provide medical assistance, and ensure access to basic healthcare services.',
         imageUrl: '/images/programs/healthcare.jpg',
         icon: 'Stethoscope',
         order: 4,
@@ -112,7 +121,8 @@ async function main() {
       {
         title: 'Rural Talent Promotion',
         slug: 'rural-talent',
-        description: 'Promoting local rural talent through various initiatives and platforms. We identify and nurture talent in rural areas, providing opportunities for growth and recognition.',
+        description:
+          'Promoting local rural talent through various initiatives and platforms. We identify and nurture talent in rural areas, providing opportunities for growth and recognition.',
         imageUrl: '/images/programs/talent.jpg',
         icon: 'Star',
         order: 5,
@@ -121,7 +131,8 @@ async function main() {
       {
         title: 'Senior Citizen Home Care',
         slug: 'senior-care',
-        description: 'Providing personal home-care assistant services for senior citizens. Our trained caregivers offer compassionate support and assistance to elderly individuals in their homes.',
+        description:
+          'Providing personal home-care assistant services for senior citizens. Our trained caregivers offer compassionate support and assistance to elderly individuals in their homes.',
         imageUrl: '/images/programs/senior-care.jpg',
         icon: 'Users',
         order: 6,
@@ -135,7 +146,8 @@ async function main() {
     data: [
       {
         title: 'Quality Education & Training',
-        description: 'Ensure quality education & training for the most neglected sections of society.',
+        description:
+          'Ensure quality education & training for the most neglected sections of society.',
         order: 1,
         isActive: true,
       },
@@ -153,7 +165,8 @@ async function main() {
       },
       {
         title: 'Community Sensitization',
-        description: 'Sensitise society regarding health, education & needs of impoverished communities.',
+        description:
+          'Sensitise society regarding health, education & needs of impoverished communities.',
         order: 4,
         isActive: true,
       },
@@ -269,8 +282,10 @@ async function main() {
       {
         title: 'Empowering Rural Women Through Vocational Training',
         slug: 'empowering-rural-women-vocational-training',
-        excerpt: 'Learn how our skill training programs are transforming lives in rural West Bengal.',
-        content: '<p>Our recent vocational training initiative has successfully trained over 200 women in various skills including tailoring, computer literacy, and healthcare assistance. The program, conducted in partnership with local communities, ensures that trainees receive guaranteed placement opportunities upon completion.</p><p>The success stories are inspiring - women who had no formal education or employment are now financially independent and contributing to their families and communities.</p>',
+        excerpt:
+          'Learn how our skill training programs are transforming lives in rural West Bengal.',
+        content:
+          '<p>Our recent vocational training initiative has successfully trained over 200 women in various skills including tailoring, computer literacy, and healthcare assistance. The program, conducted in partnership with local communities, ensures that trainees receive guaranteed placement opportunities upon completion.</p><p>The success stories are inspiring - women who had no formal education or employment are now financially independent and contributing to their families and communities.</p>',
         imageUrl: '/images/blog/training-program.jpg',
         author: 'Agraani Team',
         category: 'Training',
@@ -281,8 +296,10 @@ async function main() {
       {
         title: 'Annual Health Camp Serves 500+ Families',
         slug: 'annual-health-camp-2024',
-        excerpt: 'Our annual health camp provided free medical checkups and medications to over 500 families.',
-        content: '<p>The annual health camp organized by Agraani Welfare Foundation was a resounding success. Over 500 families from marginalized communities received free medical checkups, consultations with specialists, and necessary medications.</p><p>The camp featured various medical services including general health checkups, eye care, dental care, and diagnostic tests. We extend our gratitude to the volunteer doctors and healthcare professionals who made this possible.</p>',
+        excerpt:
+          'Our annual health camp provided free medical checkups and medications to over 500 families.',
+        content:
+          '<p>The annual health camp organized by Agraani Welfare Foundation was a resounding success. Over 500 families from marginalized communities received free medical checkups, consultations with specialists, and necessary medications.</p><p>The camp featured various medical services including general health checkups, eye care, dental care, and diagnostic tests. We extend our gratitude to the volunteer doctors and healthcare professionals who made this possible.</p>',
         imageUrl: '/images/blog/health-camp.jpg',
         author: 'Dr. Medical Team',
         category: 'Healthcare',

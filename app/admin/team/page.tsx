@@ -1,18 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Edit, Trash2, CheckCircle, XCircle, Users } from 'lucide-react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  createTeamMember,
+  deleteTeamMember,
+  getTeamMembers,
+  updateTeamMember,
+} from '@/lib/actions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { getTeamMembers, createTeamMember, updateTeamMember, deleteTeamMember } from '@/lib/actions';
+import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { CheckCircle, Edit, Plus, Trash2, Users, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface TeamMember {
   id: string;
@@ -35,7 +40,7 @@ export default function TeamMembersPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentMember, setCurrentMember] = useState<Partial<TeamMember>>({});
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const permissions = usePermissions(Resource.TEAM_MEMBERS);
 
   useEffect(() => {
@@ -124,13 +129,15 @@ export default function TeamMembersPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gradient-primary">Team Members</h1>
-          <p className="text-muted-foreground  mt-1">Manage your organization's team and leadership</p>
+          <p className="text-muted-foreground  mt-1">
+            Manage your organization's team and leadership
+          </p>
         </div>
         <PermissionGate resource={Resource.TEAM_MEMBERS} action="create">
-          <Button 
-            onClick={() => { 
-              setIsEditing(true); 
-              setCurrentMember({ order: members.length, isActive: true }); 
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+              setCurrentMember({ order: members.length, isActive: true });
             }}
             className="btn-gradient-primary"
           >
@@ -217,7 +224,9 @@ export default function TeamMembersPage() {
                 <Input
                   type="number"
                   value={currentMember.order || 0}
-                  onChange={(e) => setCurrentMember({ ...currentMember, order: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setCurrentMember({ ...currentMember, order: parseInt(e.target.value) })
+                  }
                 />
               </div>
 
@@ -225,7 +234,9 @@ export default function TeamMembersPage() {
                 <input
                   type="checkbox"
                   checked={currentMember.isActive ?? true}
-                  onChange={(e) => setCurrentMember({ ...currentMember, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setCurrentMember({ ...currentMember, isActive: e.target.checked })
+                  }
                   className="w-4 h-4 text-primary rounded focus:ring-primary"
                 />
                 <label className="text-sm font-medium">Active (visible on public website)</label>
@@ -233,16 +244,24 @@ export default function TeamMembersPage() {
             </div>
 
             <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving || !currentMember.name || !currentMember.position || !permissions.canUpdate}
+              <Button
+                onClick={handleSave}
+                disabled={
+                  isSaving ||
+                  !currentMember.name ||
+                  !currentMember.position ||
+                  !permissions.canUpdate
+                }
                 className="btn-gradient-primary"
               >
                 {isSaving ? 'Saving...' : 'Save Member'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => { setIsEditing(false); setCurrentMember({}); }}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentMember({});
+                }}
                 disabled={isSaving}
               >
                 Cancel
@@ -274,8 +293,8 @@ export default function TeamMembersPage() {
             <Card key={member.id} className="card-hover group overflow-hidden">
               <div className="relative aspect-square overflow-hidden bg-linear-to-br from-primary/5 to-secondary/5">
                 {member.imageUrl ? (
-                  <img 
-                    src={member.imageUrl} 
+                  <img
+                    src={member.imageUrl}
                     alt={member.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                   />
@@ -292,7 +311,7 @@ export default function TeamMembersPage() {
                   )}
                 </div>
               </div>
-              
+
               <CardContent className="p-4">
                 <h3 className="font-semibold text-lg">{member.name}</h3>
                 <p className="text-sm text-primary font-medium mb-2">{member.position}</p>
@@ -305,7 +324,10 @@ export default function TeamMembersPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => { setCurrentMember(member); setIsEditing(true); }}
+                      onClick={() => {
+                        setCurrentMember(member);
+                        setIsEditing(true);
+                      }}
                       className="flex-1"
                     >
                       <Edit className="h-3 w-3 mr-1" />
@@ -313,11 +335,7 @@ export default function TeamMembersPage() {
                     </Button>
                   </PermissionGate>
                   <PermissionGate resource={Resource.TEAM_MEMBERS} action="delete">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(member.id)}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(member.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </PermissionGate>

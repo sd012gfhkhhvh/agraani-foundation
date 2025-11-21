@@ -1,8 +1,8 @@
 'use client';
 
-import { UserRole } from '@prisma/client';
-import { getRoleDisplayName, getRoleBadgeColor } from '@/lib/permissions';
 import { Badge } from '@/components/ui/badge';
+import { getRoleBadgeColor, getRoleDisplayName } from '@/lib/permissions';
+import { UserRole } from '@prisma/client';
 
 interface RoleBadgeProps {
   role: UserRole;
@@ -14,10 +14,7 @@ interface RoleBadgeProps {
  */
 export function RoleBadge({ role, className = '' }: RoleBadgeProps) {
   return (
-    <Badge 
-      variant="outline" 
-      className={`${getRoleBadgeColor(role)} ${className}`}
-    >
+    <Badge variant="outline" className={`${getRoleBadgeColor(role)} ${className}`}>
       {getRoleDisplayName(role)}
     </Badge>
   );

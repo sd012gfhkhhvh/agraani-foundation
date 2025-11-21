@@ -1,11 +1,11 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/auth-utils';
-import { UserRole } from '@prisma/client';
 import { formatApiError, logError } from '@/lib/errors';
-import { Resource, Action } from '@/lib/permissions';
+import { Action, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { UserRole } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get all users (SUPER_ADMIN only)
@@ -29,7 +29,7 @@ export async function getUsers() {
 
     return { success: true, data: users };
   } catch (error) {
-    logError(error, { action:  'getUsers' });
+    logError(error, { action: 'getUsers' });
     return { success: false, error: formatApiError(error) };
   }
 }

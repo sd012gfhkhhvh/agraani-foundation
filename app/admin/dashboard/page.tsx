@@ -1,25 +1,24 @@
-import { redirect } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Users, 
-  FileText, 
-  Image, 
-  Newspaper, 
-  Mail, 
-  LayoutDashboard,
+import {
+  ArrowRight,
   Briefcase,
-  Target,
-  ImageIcon,
-  TrendingUp,
-  Calendar,
   CheckCircle,
   Clock,
-  ArrowRight,
+  FileText,
+  Image,
+  ImageIcon,
+  LayoutDashboard,
+  Mail,
+  Newspaper,
+  Target,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -63,7 +62,11 @@ export default async function AdminDashboardPage() {
           Dashboard
         </h1>
         <p className="text-gray-600 text-lg">
-          Hello, <span className="font-semibold text-gray-900">{session.user.name || session.user.email}</span>! Here's your overview.
+          Hello,{' '}
+          <span className="font-semibold text-gray-900">
+            {session.user.name || session.user.email}
+          </span>
+          ! Here's your overview.
         </p>
       </div>
 
@@ -75,9 +78,12 @@ export default async function AdminDashboardPage() {
               <Mail className="h-5 w-5 text-primary" />
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">
-                  You have {unreadContactSubmissions} unread message{unreadContactSubmissions !== 1 ? 's' : ''}
+                  You have {unreadContactSubmissions} unread message
+                  {unreadContactSubmissions !== 1 ? 's' : ''}
                 </p>
-                <p className="text-sm text-gray-600">New contact submissions are waiting for your review</p>
+                <p className="text-sm text-gray-600">
+                  New contact submissions are waiting for your review
+                </p>
               </div>
               <Link href="/admin/contact-submissions">
                 <Button size="sm" className="btn-gradient-primary">
@@ -156,11 +162,17 @@ export default async function AdminDashboardPage() {
 
         {/* Messages Stat */}
         <Link href="/admin/contact-submissions">
-          <Card className={`hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer ${hasUnreadMessages ? 'border-primary bg-primary/5' : ''}`}>
+          <Card
+            className={`hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer ${hasUnreadMessages ? 'border-primary bg-primary/5' : ''}`}
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl group-hover:scale-110 transition-transform ${hasUnreadMessages ? 'bg-primary/20' : 'bg-amber-100'}`}>
-                  <Mail className={`h-6 w-6 ${hasUnreadMessages ? 'text-primary' : 'text-amber-600'}`} />
+                <div
+                  className={`p-3 rounded-xl group-hover:scale-110 transition-transform ${hasUnreadMessages ? 'bg-primary/20' : 'bg-amber-100'}`}
+                >
+                  <Mail
+                    className={`h-6 w-6 ${hasUnreadMessages ? 'text-primary' : 'text-amber-600'}`}
+                  />
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-gray-900">{totalContactSubmissions}</div>
@@ -171,7 +183,9 @@ export default async function AdminDashboardPage() {
                 {hasUnreadMessages ? (
                   <>
                     <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-primary font-medium">{unreadContactSubmissions} unread</span>
+                    <span className="text-primary font-medium">
+                      {unreadContactSubmissions} unread
+                    </span>
                   </>
                 ) : (
                   <>
@@ -253,7 +267,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <Image className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Manage Hero Banners</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Manage Hero Banners
+                  </h3>
                   <p className="text-sm text-gray-600">Update homepage carousel</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -267,7 +283,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <Newspaper className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Create Blog Post</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Create Blog Post
+                  </h3>
                   <p className="text-sm text-gray-600">Share news and updates</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -281,7 +299,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <Briefcase className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Manage Programs</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Manage Programs
+                  </h3>
                   <p className="text-sm text-gray-600">Add or edit offerings</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -295,7 +315,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <Users className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Manage Team</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Manage Team
+                  </h3>
                   <p className="text-sm text-gray-600">Update team members</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -309,7 +331,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <ImageIcon className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Update Gallery</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Update Gallery
+                  </h3>
                   <p className="text-sm text-gray-600">Add photos and videos</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -323,7 +347,9 @@ export default async function AdminDashboardPage() {
               <div className="flex items-start gap-3">
                 <FileText className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">Edit About Content</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    Edit About Content
+                  </h3>
                   <p className="text-sm text-gray-600">Update organization info</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />

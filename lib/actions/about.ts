@@ -1,11 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
-import { hasPermission, Action } from '@/lib/permissions';
-import { Resource } from '@/lib/permissions';
 import { getCurrentUser } from '@/lib/auth-utils';
 import { ForbiddenError, NotFoundError } from '@/lib/errors';
+import { Action, hasPermission, Resource } from '@/lib/permissions';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 // Get all about content sections
 export async function getAboutContent() {
@@ -52,12 +51,12 @@ export async function updateAboutContent(
     return { success: true, data: updated };
   } catch (error: any) {
     console.error('Error updating about content:', error);
-    return { 
-      success: false, 
-      error: { 
+    return {
+      success: false,
+      error: {
         message: error.message || 'Failed to update about content',
-        statusCode: error.statusCode || 500
-      } 
+        statusCode: error.statusCode || 500,
+      },
     };
   }
 }

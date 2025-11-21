@@ -1,15 +1,16 @@
-import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
-import { ArrowRight, Heart, Users, Target, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { prisma } from '@/lib/prisma';
+import { ArrowRight, Heart, Sparkles, Target, Users } from 'lucide-react';
+import { Metadata } from 'next';
+import Link from 'next/link';
 
 export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'Agraani Welfare Foundation - Empowering Women, Transforming Lives',
-  description: 'Join us in empowering women and children through education, skill training, and community development in West Bengal, India.',
+  description:
+    'Join us in empowering women and children through education, skill training, and community development in West Bengal, India.',
 };
 
 export default async function HomePage() {
@@ -39,12 +40,12 @@ export default async function HomePage() {
       <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
         {/* Background with gradient overlay */}
         <div className="absolute inset-0">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: hero?.imageUrl 
-                ? `url(${hero.imageUrl})` 
-                : 'linear-gradient(135deg, #2D5F3F 0%, #4A8B63 100%)'
+              backgroundImage: hero?.imageUrl
+                ? `url(${hero.imageUrl})`
+                : 'linear-gradient(135deg, #2D5F3F 0%, #4A8B63 100%)',
             }}
           />
           <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
@@ -58,7 +59,7 @@ export default async function HomePage() {
               <Sparkles className="h-4 w-4 text-secondary" />
               <span className="text-sm font-medium">Transforming Lives Since 2020</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-fade-in">
               {hero?.title || 'Empowering Women,'}
               <br />
@@ -66,19 +67,29 @@ export default async function HomePage() {
                 {hero?.subtitle || 'Transforming Communities'}
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed animate-fade-in">
-              {hero?.description || 'Join us in creating sustainable change through education, skill development, and community empowerment across West Bengal.'}
+              {hero?.description ||
+                'Join us in creating sustainable change through education, skill development, and community empowerment across West Bengal.'}
             </p>
 
             <div className="flex flex-wrap gap-4 animate-fade-in">
-              <Button asChild size="lg" className="btn-gradient-secondary text-lg px-8 py-6 hover:scale-105 transition-smooth">
+              <Button
+                asChild
+                size="lg"
+                className="btn-gradient-secondary text-lg px-8 py-6 hover:scale-105 transition-smooth"
+              >
                 <Link href="/donate">
                   <Heart className="h-5 w-5 mr-2" />
                   Support Our Mission
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 text-lg px-8 py-6">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 text-lg px-8 py-6"
+              >
                 <Link href="/programs">
                   Explore Programs
                   <ArrowRight className="h-5 w-5 ml-2" />
@@ -109,9 +120,7 @@ export default async function HomePage() {
               <Card key={index} className="card-hover text-center">
                 <CardContent className="p-6">
                   <stat.icon className="h-8 w-8 text-primary mx-auto mb-3" />
-                  <div className="text-4xl font-bold text-gradient-primary mb-2">
-                    {stat.value}
-                  </div>
+                  <div className="text-4xl font-bold text-gradient-primary mb-2">{stat.value}</div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </CardContent>
               </Card>
@@ -149,10 +158,11 @@ export default async function HomePage() {
                   <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-smooth">
                     {program.title}
                   </h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {program.description}
-                  </p>
-                  <Link href="/programs" className="text-primary hover:underline inline-flex items-center gap-1">
+                  <p className="text-muted-foreground mb-4 line-clamp-3">{program.description}</p>
+                  <Link
+                    href="/programs"
+                    className="text-primary hover:underline inline-flex items-center gap-1"
+                  >
                     Learn more <ArrowRight className="h-4 w-4" />
                   </Link>
                 </CardContent>
@@ -205,22 +215,29 @@ export default async function HomePage() {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-r from-primary to-secondary opacity-90" />
         <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-10" />
-        
+
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Be the Change You Want to See
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">Be the Change You Want to See</h2>
           <p className="text-xl mb-8 opacity-90">
             Your support helps us empower more women and transform more communities every day.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6">
+            <Button
+              asChild
+              size="lg"
+              className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6"
+            >
               <Link href="/donate">
                 <Heart className="h-5 w-5 mr-2" />
                 Donate Now
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10 text-lg px-8 py-6">
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white text-white hover:bg-white/10 text-lg px-8 py-6"
+            >
               <Link href="/contact">
                 Get Involved
                 <ArrowRight className="h-5 w-5 ml-2" />

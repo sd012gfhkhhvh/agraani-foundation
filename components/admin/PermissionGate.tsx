@@ -1,9 +1,8 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { UserRole } from '@prisma/client';
-import { Resource } from '@/lib/permissions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Resource } from '@/lib/permissions';
+import { ReactNode } from 'react';
 
 interface PermissionGateProps {
   resource: Resource;
@@ -16,7 +15,12 @@ interface PermissionGateProps {
  * Component that conditionally renders children based on user permissions
  * Usage: <PermissionGate resource={Resource.BLOG_POSTS} action="delete">...</PermissionGate>
  */
-export function PermissionGate({ resource, action, children, fallback = null }: PermissionGateProps) {
+export function PermissionGate({
+  resource,
+  action,
+  children,
+  fallback = null,
+}: PermissionGateProps) {
   const permissions = usePermissions(resource);
 
   const hasAccess = {

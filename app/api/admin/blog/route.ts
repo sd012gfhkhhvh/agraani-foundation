@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(posts);
   } catch (error) {
     console.error('Error fetching blog posts:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch blog posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch blog posts' }, { status: 500 });
   }
 }
 
@@ -28,12 +25,14 @@ export async function POST(request: NextRequest) {
     await requireRole([UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN, UserRole.EDITOR]);
 
     const data = await request.json();
-    
+
     // Generate slug from title if not provided
-    const slug = data.slug || data.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug =
+      data.slug ||
+      data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
 
     const post = await prisma.blogPost.create({
       data: {
@@ -48,7 +47,14 @@ export async function POST(request: NextRequest) {
     console.error('Error creating blog post:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create blog post' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -75,7 +81,14 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating blog post:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update blog post' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }
@@ -100,7 +113,14 @@ export async function DELETE(request: NextRequest) {
     console.error('Error deleting blog post:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete blog post' },
-      { status: error.message === 'Unauthorized' ? 401 : error.message === 'Forbidden: Insufficient permissions' ? 403 : 500 }
+      {
+        status:
+          error.message === 'Unauthorized'
+            ? 401
+            : error.message === 'Forbidden: Insufficient permissions'
+              ? 403
+              : 500,
+      }
     );
   }
 }

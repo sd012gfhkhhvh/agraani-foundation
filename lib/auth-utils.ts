@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
-import { UserRole } from "@prisma/client";
-import { hasPermission, Resource, Action } from "@/lib/permissions";
-import { ForbiddenError } from "@/lib/errors";
+import { auth } from '@/lib/auth';
+import { ForbiddenError } from '@/lib/errors';
+import { Action, hasPermission, Resource } from '@/lib/permissions';
+import { UserRole } from '@prisma/client';
 
 export async function getCurrentUser() {
   const session = await auth();
@@ -11,7 +11,7 @@ export async function getCurrentUser() {
 export async function requireAuth() {
   const user = await getCurrentUser();
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
   return user;
 }
@@ -19,7 +19,7 @@ export async function requireAuth() {
 /**
  * Require user to have specific permission for a resource/action
  * This is the recommended way to check permissions in server actions
- * 
+ *
  * @param resource - The resource being accessed
  * @param action - The action being performed
  * @param context - Optional context for better error messages and debugging
@@ -36,10 +36,10 @@ export async function requirePermission(
   }
 ) {
   const user = await requireAuth();
-  
+
   if (!hasPermission(user.role as UserRole, resource, action)) {
     const { getPermissionDescription } = await import('@/lib/permissions');
-    
+
     throw new ForbiddenError(
       `You do not have permission to ${getPermissionDescription(resource, action)}`,
       {
@@ -53,7 +53,7 @@ export async function requirePermission(
       }
     );
   }
-  
+
   return user;
 }
 
@@ -64,7 +64,7 @@ export async function requirePermission(
 export async function requireRole(allowedRoles: UserRole[]) {
   const user = await requireAuth();
   if (!user.role || !allowedRoles.includes(user.role as UserRole)) {
-    throw new Error("Forbidden: Insufficient permissions");
+    throw new Error('Forbidden: Insufficient permissions');
   }
   return user;
 }

@@ -1,6 +1,6 @@
+import { PrismaAdapter } from '@auth/prisma-adapter';
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './prisma';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -21,16 +21,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
-      
+
       // Protect admin routes
       if (pathname.startsWith('/admin')) {
         const isAuthenticated = !!auth?.user;
         const userRole = (auth?.user as any)?.role;
         const hasAdminAccess = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'].includes(userRole);
-        
+
         return isAuthenticated && hasAdminAccess;
       }
-      
+
       // Allow all other routes
       return true;
     },

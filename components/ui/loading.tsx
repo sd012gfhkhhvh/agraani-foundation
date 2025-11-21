@@ -13,7 +13,13 @@ export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) 
   };
 
   return (
-    <div className={cn('animate-spin rounded-full border-b-2 border-primary', sizeClasses[size], className)} />
+    <div
+      className={cn(
+        'animate-spin rounded-full border-b-2 border-primary',
+        sizeClasses[size],
+        className
+      )}
+    />
   );
 }
 
@@ -26,9 +32,7 @@ export function LoadingCard() {
 }
 
 export function LoadingSkeleton({ className }: { className?: string }) {
-  return (
-    <div className={cn('animate-pulse bg-muted rounded', className)} />
-  );
+  return <div className={cn('animate-pulse bg-muted rounded', className)} />;
 }
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {

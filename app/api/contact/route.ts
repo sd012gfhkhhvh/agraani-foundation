@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,9 +21,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error submitting contact form:', error);
-    return NextResponse.json(
-      { error: 'Failed to submit contact form' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to submit contact form' }, { status: 500 });
   }
 }

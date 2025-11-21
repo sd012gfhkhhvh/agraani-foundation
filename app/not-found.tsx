@@ -1,7 +1,7 @@
-'use client'
-import Link from 'next/link';
+'use client';
 import { Button } from '@/components/ui/button';
-import { Home, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
+import Link from 'next/link';
 
 export default function NotFound() {
   return (
@@ -9,15 +9,11 @@ export default function NotFound() {
       <div className="text-center max-w-2xl">
         {/* 404 Animation */}
         <div className="mb-8">
-          <h1 className="text-9xl font-bold text-gradient-primary animate-fade-in">
-            404
-          </h1>
+          <h1 className="text-9xl font-bold text-gradient-primary animate-fade-in">404</h1>
         </div>
 
         {/* Message */}
-        <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">
-          Page Not Found
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">Page Not Found</h2>
         <p className="text-lg text-muted-foreground mb-8 animate-fade-in">
           Sorry, the page you're looking for doesn't exist or has been moved.
         </p>
@@ -30,11 +26,7 @@ export default function NotFound() {
               Go to Homepage
             </Button>
           </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => window.history.back()}
-          >
+          <Button size="lg" variant="outline" onClick={() => window.history.back()}>
             <ArrowLeft className="h-5 w-5 mr-2" />
             Go Back
           </Button>
@@ -42,9 +34,7 @@ export default function NotFound() {
 
         {/* Helpful Links */}
         <div className="mt-12 pt-8 border-t">
-          <p className="text-sm text-muted-foreground mb-4">
-            You might be looking for:
-          </p>
+          <p className="text-sm text-muted-foreground mb-4">You might be looking for:</p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/about" className="text-primary hover:underline">
               About Us

@@ -1,17 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Edit, Trash2, FileText, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import { Resource } from '@/lib/permissions';
+import {
+  createLegalDocument,
+  deleteLegalDocument,
+  getLegalDocuments,
+  updateLegalDocument,
+} from '@/lib/actions';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { getLegalDocuments, createLegalDocument, updateLegalDocument, deleteLegalDocument } from '@/lib/actions';
+import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { Edit, Eye, FileText, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface LegalDocument {
   id: string;
@@ -35,7 +40,7 @@ export default function LegalDocumentsPage() {
   const [currentDoc, setCurrentDoc] = useState<Partial<LegalDocument>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [viewingDoc, setViewingDoc] = useState<LegalDocument | null>(null);
-  
+
   const permissions = usePermissions(Resource.LEGAL_DOCUMENTS);
 
   useEffect(() => {
@@ -54,7 +59,12 @@ export default function LegalDocumentsPage() {
   };
 
   const handleSave = async () => {
-    if (!currentDoc.name || !currentDoc.documentType || !currentDoc.registrationNumber || !currentDoc.validity) {
+    if (
+      !currentDoc.name ||
+      !currentDoc.documentType ||
+      !currentDoc.registrationNumber ||
+      !currentDoc.validity
+    ) {
       showError('Please fill in all required fields');
       return;
     }
@@ -137,7 +147,9 @@ export default function LegalDocumentsPage() {
                 <p className="mt-1">{viewingDoc.documentType}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Registration Number</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Registration Number
+                </label>
                 <p className="mt-1 font-mono">{viewingDoc.registrationNumber}</p>
               </div>
               <div>
@@ -160,7 +172,12 @@ export default function LegalDocumentsPage() {
                 <div className="col-span-2">
                   <label className="text-sm font-medium text-muted-foreground">Document File</label>
                   <p className="mt-1">
-                    <a href={viewingDoc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    <a
+                      href={viewingDoc.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
                       View Document →
                     </a>
                   </p>
@@ -184,13 +201,15 @@ export default function LegalDocumentsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gradient-primary">Legal & Compliance</h1>
-          <p className="text-muted-foreground mt-1">Manage organizational registrations and certifications</p>
+          <p className="text-muted-foreground mt-1">
+            Manage organizational registrations and certifications
+          </p>
         </div>
         <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="create">
-          <Button 
-            onClick={() => { 
-              setIsEditing(true); 
-              setCurrentDoc({ order: documents.length }); 
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+              setCurrentDoc({ order: documents.length });
             }}
             className="btn-gradient-primary"
           >
@@ -203,9 +222,7 @@ export default function LegalDocumentsPage() {
       {isEditing && (
         <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
           <CardHeader>
-            <CardTitle>
-              {currentDoc.id ? 'Edit Document' : 'Add New Document'}
-            </CardTitle>
+            <CardTitle>{currentDoc.id ? 'Edit Document' : 'Add New Document'}</CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -231,7 +248,9 @@ export default function LegalDocumentsPage() {
                 <label className="block text-sm font-medium mb-2">Registration Number *</label>
                 <Input
                   value={currentDoc.registrationNumber || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, registrationNumber: e.target.value })}
+                  onChange={(e) =>
+                    setCurrentDoc({ ...currentDoc, registrationNumber: e.target.value })
+                  }
                   placeholder="e.g., 80G/2024/ABC123"
                 />
               </div>
@@ -249,7 +268,11 @@ export default function LegalDocumentsPage() {
                 <label className="block text-sm font-medium mb-2">Issue Date</label>
                 <Input
                   type="date"
-                  value={currentDoc.issueDate ? new Date(currentDoc.issueDate).toISOString().split('T')[0] : ''}
+                  value={
+                    currentDoc.issueDate
+                      ? new Date(currentDoc.issueDate).toISOString().split('T')[0]
+                      : ''
+                  }
                   onChange={(e) => setCurrentDoc({ ...currentDoc, issueDate: e.target.value })}
                 />
               </div>
@@ -258,7 +281,11 @@ export default function LegalDocumentsPage() {
                 <label className="block text-sm font-medium mb-2">Expiry Date</label>
                 <Input
                   type="date"
-                  value={currentDoc.expiryDate ? new Date(currentDoc.expiryDate).toISOString().split('T')[0] : ''}
+                  value={
+                    currentDoc.expiryDate
+                      ? new Date(currentDoc.expiryDate).toISOString().split('T')[0]
+                      : ''
+                  }
                   onChange={(e) => setCurrentDoc({ ...currentDoc, expiryDate: e.target.value })}
                 />
               </div>
@@ -285,16 +312,26 @@ export default function LegalDocumentsPage() {
             </div>
 
             <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving || !currentDoc.name || !currentDoc.documentType || !currentDoc.registrationNumber || !currentDoc.validity || !permissions.canUpdate}
+              <Button
+                onClick={handleSave}
+                disabled={
+                  isSaving ||
+                  !currentDoc.name ||
+                  !currentDoc.documentType ||
+                  !currentDoc.registrationNumber ||
+                  !currentDoc.validity ||
+                  !permissions.canUpdate
+                }
                 className="btn-gradient-primary"
               >
                 {isSaving ? 'Saving...' : 'Save Document'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => { setIsEditing(false); setCurrentDoc({}); }}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentDoc({});
+                }}
                 disabled={isSaving}
               >
                 Cancel
@@ -334,25 +371,23 @@ export default function LegalDocumentsPage() {
                         <span className="font-medium">Type:</span> {doc.documentType}
                       </p>
                       <p className="text-muted-foreground">
-                        <span className="font-medium">Registration:</span> <span className="font-mono">{doc.registrationNumber}</span>
+                        <span className="font-medium">Registration:</span>{' '}
+                        <span className="font-mono">{doc.registrationNumber}</span>
                       </p>
                       <p className="text-muted-foreground">
                         <span className="font-medium">Validity:</span> {doc.validity}
                       </p>
                       {doc.expiryDate && (
                         <p className="text-muted-foreground">
-                          <span className="font-medium">Expires:</span> {new Date(doc.expiryDate).toLocaleDateString()}
+                          <span className="font-medium">Expires:</span>{' '}
+                          {new Date(doc.expiryDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setViewingDoc(doc)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => setViewingDoc(doc)}>
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </Button>
@@ -360,17 +395,16 @@ export default function LegalDocumentsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => { setCurrentDoc(doc); setIsEditing(true); }}
+                        onClick={() => {
+                          setCurrentDoc(doc);
+                          setIsEditing(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </PermissionGate>
                     <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="delete">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(doc.id)}
-                      >
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(doc.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </PermissionGate>
