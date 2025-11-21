@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: agraani-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agraani
+      POSTGRES_PASSWORD: agraani_dev_password
+      POSTGRES_DB: agraani_foundation
+    ports:
+      - "5432:5432"
+    volumes:
+      - agraani_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agraani"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  agraani_db_data:
+    driver: local
