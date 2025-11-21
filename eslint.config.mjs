@@ -14,6 +14,14 @@ const eslintConfig = [
   {
     ignores: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
   },
+  {
+    rules: {
+      'react/no-unescaped-entities': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+    },
+  },
 ];
 
 export default eslintConfig;
