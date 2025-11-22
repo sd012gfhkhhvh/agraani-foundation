@@ -55,38 +55,52 @@ export default async function AdminDashboardPage() {
   const hasUnreadMessages = unreadContactSubmissions > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Welcome Header */}
-      <div>
-        <h1 className="text-4xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
-          Dashboard
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Hello,{' '}
-          <span className="font-semibold text-gray-900">
-            {session.user.name || session.user.email}
-          </span>
-          ! Here's your overview.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-gradient-primary mb-2 tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Welcome back,{' '}
+            <span className="font-semibold text-foreground">
+              {session.user.name || session.user.email}
+            </span>
+            . Here's what's happening today.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium text-foreground bg-secondary/50 px-4 py-2 rounded-full border border-border shadow-sm">
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Alert for Unread Messages */}
       {hasUnreadMessages && (
-        <Card className="border-l-4 border-l-primary bg-primary/5">
+        <Card className="border-l-4 border-l-primary bg-primary/5 shadow-sm">
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Mail className="h-5 w-5 text-primary" />
+              </div>
               <div className="flex-1">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-foreground">
                   You have {unreadContactSubmissions} unread message
                   {unreadContactSubmissions !== 1 ? 's' : ''}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   New contact submissions are waiting for your review
                 </p>
               </div>
               <Link href="/admin/contact-submissions">
-                <Button size="sm" className="btn-gradient-primary">
+                <Button size="sm" className="btn-gradient-primary shadow-md">
                   View Messages
                 </Button>
               </Link>
@@ -99,20 +113,23 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Programs Stat */}
         <Link href="/admin/programs">
-          <Card className="hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer">
-            <CardContent className="p-6">
+          <Card className="hover:shadow-lg transition-all duration-300 border-muted/60 hover:border-primary/20 group cursor-pointer overflow-hidden relative bg-card">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Briefcase className="h-24 w-24 text-primary transform translate-x-8 -translate-y-8" />
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform">
-                  <Briefcase className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300 border border-primary/20">
+                  <Briefcase className="h-6 w-6 text-primary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-gray-900">{programsCount}</div>
-                  <div className="text-sm text-gray-500 mt-1">Total Programs</div>
+                  <div className="text-3xl font-bold text-foreground">{programsCount}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium">Programs</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-gray-600">{activeProgramsCount} active</span>
+              <div className="flex items-center gap-2 text-xs font-medium bg-primary/10 w-fit px-2.5 py-1 rounded-full text-primary border border-primary/20">
+                <CheckCircle className="h-3.5 w-3.5" />
+                <span>{activeProgramsCount} active</span>
               </div>
             </CardContent>
           </Card>
@@ -120,20 +137,23 @@ export default async function AdminDashboardPage() {
 
         {/* Blog Posts Stat */}
         <Link href="/admin/blog">
-          <Card className="hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer">
-            <CardContent className="p-6">
+          <Card className="hover:shadow-lg transition-all duration-300 border-muted/60 hover:border-secondary/20 group cursor-pointer overflow-hidden relative bg-card">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Newspaper className="h-24 w-24 text-secondary transform translate-x-8 -translate-y-8" />
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform">
-                  <Newspaper className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-secondary/10 rounded-xl group-hover:scale-110 transition-transform duration-300 border border-secondary/20">
+                  <Newspaper className="h-6 w-6 text-secondary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-gray-900">{blogPostsCount}</div>
-                  <div className="text-sm text-gray-500 mt-1">Blog Posts</div>
+                  <div className="text-3xl font-bold text-foreground">{blogPostsCount}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium">Blog Posts</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="text-gray-600">{publishedBlogsCount} published</span>
+              <div className="flex items-center gap-2 text-xs font-medium bg-secondary/10 w-fit px-2.5 py-1 rounded-full text-secondary border border-secondary/20">
+                <TrendingUp className="h-3.5 w-3.5" />
+                <span>{publishedBlogsCount} published</span>
               </div>
             </CardContent>
           </Card>
@@ -141,20 +161,23 @@ export default async function AdminDashboardPage() {
 
         {/* Gallery Stat */}
         <Link href="/admin/gallery">
-          <Card className="hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer">
-            <CardContent className="p-6">
+          <Card className="hover:shadow-lg transition-all duration-300 border-muted/60 hover:border-accent/20 group cursor-pointer overflow-hidden relative bg-card">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <ImageIcon className="h-24 w-24 text-accent transform translate-x-8 -translate-y-8" />
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-green-100 rounded-xl group-hover:scale-110 transition-transform">
-                  <ImageIcon className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-accent/10 rounded-xl group-hover:scale-110 transition-transform duration-300 border border-accent/20">
+                  <ImageIcon className="h-6 w-6 text-accent" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-gray-900">{galleryCount}</div>
-                  <div className="text-sm text-gray-500 mt-1">Media Items</div>
+                  <div className="text-3xl font-bold text-foreground">{galleryCount}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium">Media Items</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Image className="h-4 w-4 text-gray-600" />
-                <span className="text-gray-600">Photos & Videos</span>
+              <div className="flex items-center gap-2 text-xs font-medium bg-accent/10 w-fit px-2.5 py-1 rounded-full text-accent border border-accent/20">
+                <Image className="h-3.5 w-3.5" />
+                <span>Photos & Videos</span>
               </div>
             </CardContent>
           </Card>
@@ -163,35 +186,38 @@ export default async function AdminDashboardPage() {
         {/* Messages Stat */}
         <Link href="/admin/contact-submissions">
           <Card
-            className={`hover:shadow-lg transition-all duration-200 border-2 hover:border-primary group cursor-pointer ${hasUnreadMessages ? 'border-primary bg-primary/5' : ''}`}
+            className={`hover:shadow-lg transition-all duration-300 border-muted/60 hover:border-primary/20 group cursor-pointer overflow-hidden relative bg-card ${hasUnreadMessages ? 'ring-2 ring-primary/20' : ''}`}
           >
-            <CardContent className="p-6">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Mail
+                className={`h-24 w-24 transform translate-x-8 -translate-y-8 ${hasUnreadMessages ? 'text-primary' : 'text-muted-foreground'}`}
+              />
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
                 <div
-                  className={`p-3 rounded-xl group-hover:scale-110 transition-transform ${hasUnreadMessages ? 'bg-primary/20' : 'bg-amber-100'}`}
+                  className={`p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 border ${hasUnreadMessages ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-muted border-border text-muted-foreground'}`}
                 >
-                  <Mail
-                    className={`h-6 w-6 ${hasUnreadMessages ? 'text-primary' : 'text-amber-600'}`}
-                  />
+                  <Mail className="h-6 w-6" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-gray-900">{totalContactSubmissions}</div>
-                  <div className="text-sm text-gray-500 mt-1">Messages</div>
+                  <div className="text-3xl font-bold text-foreground">
+                    {totalContactSubmissions}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium">Messages</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs font-medium">
                 {hasUnreadMessages ? (
-                  <>
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-primary font-medium">
-                      {unreadContactSubmissions} unread
-                    </span>
-                  </>
+                  <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{unreadContactSubmissions} unread</span>
+                  </div>
                 ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-gray-600">All read</span>
-                  </>
+                  <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full border border-green-500/20">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    <span>All read</span>
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -202,15 +228,15 @@ export default async function AdminDashboardPage() {
       {/* Secondary Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/admin/team">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+          <Card className="hover:shadow-md transition-all duration-300 cursor-pointer group border-muted/60 hover:border-indigo-200">
             <CardContent className="p-5">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-indigo-100 rounded-lg group-hover:scale-110 transition-transform">
-                  <Users className="h-5 w-5 text-indigo-600" />
+                <div className="p-2.5 bg-indigo-50 rounded-lg group-hover:scale-110 transition-transform duration-300 text-indigo-600 border border-indigo-100">
+                  <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{teamMembersCount}</div>
-                  <div className="text-sm text-gray-600">Team Members</div>
+                  <div className="text-2xl font-bold text-foreground">{teamMembersCount}</div>
+                  <div className="text-sm text-muted-foreground font-medium">Team Members</div>
                 </div>
               </div>
             </CardContent>
@@ -218,15 +244,15 @@ export default async function AdminDashboardPage() {
         </Link>
 
         <Link href="/admin/objectives">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+          <Card className="hover:shadow-md transition-all duration-300 cursor-pointer group border-muted/60 hover:border-cyan-200">
             <CardContent className="p-5">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-cyan-100 rounded-lg group-hover:scale-110 transition-transform">
-                  <Target className="h-5 w-5 text-cyan-600" />
+                <div className="p-2.5 bg-cyan-50 rounded-lg group-hover:scale-110 transition-transform duration-300 text-cyan-600 border border-cyan-100">
+                  <Target className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{objectivesCount}</div>
-                  <div className="text-sm text-gray-600">Objectives</div>
+                  <div className="text-2xl font-bold text-foreground">{objectivesCount}</div>
+                  <div className="text-sm text-muted-foreground font-medium">Objectives</div>
                 </div>
               </div>
             </CardContent>
@@ -234,15 +260,15 @@ export default async function AdminDashboardPage() {
         </Link>
 
         <Link href="/admin/hero-banners">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+          <Card className="hover:shadow-md transition-all duration-300 cursor-pointer group border-muted/60 hover:border-pink-200">
             <CardContent className="p-5">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-pink-100 rounded-lg group-hover:scale-110 transition-transform">
-                  <Image className="h-5 w-5 text-pink-600" />
+                <div className="p-2.5 bg-pink-50 rounded-lg group-hover:scale-110 transition-transform duration-300 text-pink-600 border border-pink-100">
+                  <Image className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{heroBannersCount}</div>
-                  <div className="text-sm text-gray-600">Hero Banners</div>
+                  <div className="text-2xl font-bold text-foreground">{heroBannersCount}</div>
+                  <div className="text-sm text-muted-foreground font-medium">Hero Banners</div>
                 </div>
               </div>
             </CardContent>
@@ -251,108 +277,120 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5" />
+      <Card className="border-muted/60 shadow-sm">
+        <CardHeader className="border-b bg-muted/5 pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <LayoutDashboard className="h-5 w-5 text-primary" />
             Quick Actions
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               href="/admin/hero-banners"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <Image className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-pink-50 text-pink-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <Image className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Manage Hero Banners
                   </h3>
-                  <p className="text-sm text-gray-600">Update homepage carousel</p>
+                  <p className="text-xs text-muted-foreground truncate">Update homepage carousel</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
 
             <Link
               href="/admin/blog"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <Newspaper className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <Newspaper className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Create Blog Post
                   </h3>
-                  <p className="text-sm text-gray-600">Share news and updates</p>
+                  <p className="text-xs text-muted-foreground truncate">Share news and updates</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
 
             <Link
               href="/admin/programs"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <Briefcase className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <Briefcase className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Manage Programs
                   </h3>
-                  <p className="text-sm text-gray-600">Add or edit offerings</p>
+                  <p className="text-xs text-muted-foreground truncate">Add or edit offerings</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
 
             <Link
               href="/admin/team"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <Users className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Manage Team
                   </h3>
-                  <p className="text-sm text-gray-600">Update team members</p>
+                  <p className="text-xs text-muted-foreground truncate">Update team members</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
 
             <Link
               href="/admin/gallery"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <ImageIcon className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-green-50 text-green-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <ImageIcon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Update Gallery
                   </h3>
-                  <p className="text-sm text-gray-600">Add photos and videos</p>
+                  <p className="text-xs text-muted-foreground truncate">Add photos and videos</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
 
             <Link
               href="/admin/about"
-              className="group p-5 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all duration-200 bg-linear-to-br from-white to-gray-50"
+              className="group p-4 border border-muted rounded-xl hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition-all duration-200 bg-card"
             >
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-orange-50 text-orange-600 group-hover:bg-white group-hover:text-primary transition-colors">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-0.5 group-hover:text-primary transition-colors truncate">
                     Edit About Content
                   </h3>
-                  <p className="text-sm text-gray-600">Update organization info</p>
+                  <p className="text-xs text-muted-foreground truncate">Update organization info</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
               </div>
             </Link>
           </div>

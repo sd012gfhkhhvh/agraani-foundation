@@ -1,8 +1,8 @@
 'use server';
 
-import { getCurrentUser } from '@/lib/auth-utils';
-import { ForbiddenError, NotFoundError } from '@/lib/errors';
-import { Action, hasPermission, Resource } from '@/lib/permissions';
+import { requirePermission } from '@/lib/auth-utils';
+import { formatApiError, logError, NotFoundError } from '@/lib/errors';
+import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
@@ -15,8 +15,44 @@ export async function getAboutContent() {
 
     return { success: true, data: sections };
   } catch (error) {
-    console.error('Error fetching about content:', error);
-    return { success: false, error: { message: 'Failed to fetch about content' } };
+    logError(error, { action: 'getAboutContent' });
+    return { success: false, error: formatApiError(error) };
+  }
+}
+
+// Create about content section
+export async function createAboutContent(data: {
+  section: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+}) {
+  try {
+    await requirePermission(Resource.ABOUT_CONTENT, Action.CREATE);
+
+    // Check if section already exists
+    const existing = await prisma.aboutContent.findUnique({
+      where: { section: data.section },
+    });
+
+    if (existing) {
+      return {
+        success: false,
+        error: { message: 'A section with this ID already exists' },
+      };
+    }
+
+    const newSection = await prisma.aboutContent.create({
+      data,
+    });
+
+    revalidatePath('/about');
+    revalidatePath('/admin/about');
+
+    return { success: true, data: newSection };
+  } catch (error) {
+    logError(error, { action: 'createAboutContent', data });
+    return { success: false, error: formatApiError(error) };
   }
 }
 
@@ -30,14 +66,11 @@ export async function updateAboutContent(
   }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user || !hasPermission(user.role, Resource.ABOUT_CONTENT, Action.UPDATE)) {
-      throw new ForbiddenError('You do not have permission to update about content');
-    }
+    await requirePermission(Resource.ABOUT_CONTENT, Action.UPDATE);
 
     const section = await prisma.aboutContent.findUnique({ where: { id } });
     if (!section) {
-      throw new NotFoundError('About content section not found');
+      throw new NotFoundError('About content section');
     }
 
     const updated = await prisma.aboutContent.update({
@@ -49,14 +82,32 @@ export async function updateAboutContent(
     revalidatePath('/admin/about');
 
     return { success: true, data: updated };
-  } catch (error: any) {
-    console.error('Error updating about content:', error);
-    return {
-      success: false,
-      error: {
-        message: error.message || 'Failed to update about content',
-        statusCode: error.statusCode || 500,
-      },
-    };
+  } catch (error) {
+    logError(error, { action: 'updateAboutContent', id, data });
+    return { success: false, error: formatApiError(error) };
+  }
+}
+
+// Delete about content section
+export async function deleteAboutContent(id: string) {
+  try {
+    await requirePermission(Resource.ABOUT_CONTENT, Action.DELETE);
+
+    const section = await prisma.aboutContent.findUnique({ where: { id } });
+    if (!section) {
+      throw new NotFoundError('About content section');
+    }
+
+    await prisma.aboutContent.delete({
+      where: { id },
+    });
+
+    revalidatePath('/about');
+    revalidatePath('/admin/about');
+
+    return { success: true };
+  } catch (error) {
+    logError(error, { action: 'deleteAboutContent', id });
+    return { success: false, error: formatApiError(error) };
   }
 }

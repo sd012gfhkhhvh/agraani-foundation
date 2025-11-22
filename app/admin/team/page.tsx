@@ -1,8 +1,11 @@
 'use client';
 
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminDialog } from '@/components/admin/AdminDialog';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { DeleteDialog } from '@/components/admin/DeleteDialog';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
@@ -16,7 +19,7 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
-import { CheckCircle, Edit, Plus, Trash2, Users, XCircle } from 'lucide-react';
+import { Edit, Plus, Trash2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface TeamMember {
@@ -37,9 +40,13 @@ interface TeamMember {
 export default function TeamMembersPage() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<Partial<TeamMember>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.TEAM_MEMBERS);
 
@@ -49,13 +56,22 @@ export default function TeamMembersPage() {
 
   const fetchMembers = async () => {
     setIsLoading(true);
-    const result = await getTeamMembers(false);
+    const result = await getTeamMembers();
     if (result.success && result.data) {
       setMembers(result.data);
     } else {
       showError('Failed to load team members');
     }
     setIsLoading(false);
+  };
+
+  const handleOpenDialog = (member?: TeamMember) => {
+    if (member) {
+      setCurrentMember(member);
+    } else {
+      setCurrentMember({ order: members.length, isActive: true });
+    }
+    setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -98,7 +114,7 @@ export default function TeamMembersPage() {
 
       if (result.success) {
         await fetchMembers();
-        setIsEditing(false);
+        setIsDialogOpen(false);
         setCurrentMember({});
       }
     } finally {
@@ -106,17 +122,29 @@ export default function TeamMembersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this team member?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const result = await showPromiseToast(deleteTeamMember(id), {
-      loading: 'Deleting...',
-      success: 'Team member deleted!',
-      error: 'Failed to delete team member',
-    });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    if (result.success) {
-      await fetchMembers();
+    setIsDeleting(true);
+    try {
+      const result = await showPromiseToast(deleteTeamMember(deleteId), {
+        loading: 'Deleting...',
+        success: 'Team member deleted!',
+        error: 'Failed to delete team member',
+      });
+
+      if (result.success) {
+        await fetchMembers();
+        setIsDeleteDialogOpen(false);
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -125,153 +153,21 @@ export default function TeamMembersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Team Members</h1>
-          <p className="text-muted-foreground  mt-1">
-            Manage your organization's team and leadership
-          </p>
-        </div>
-        <PermissionGate resource={Resource.TEAM_MEMBERS} action="create">
-          <Button
-            onClick={() => {
-              setIsEditing(true);
-              setCurrentMember({ order: members.length, isActive: true });
-            }}
-            className="btn-gradient-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Team Member
-          </Button>
-        </PermissionGate>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="Team Members"
+        description="Manage your organization's team and leadership"
+        action={
+          <PermissionGate resource={Resource.TEAM_MEMBERS} action="create">
+            <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Team Member
+            </Button>
+          </PermissionGate>
+        }
+      />
 
-      {isEditing && (
-        <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
-          <CardHeader>
-            <CardTitle>{currentMember.id ? 'Edit Team Member' : 'Add New Team Member'}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Name *</label>
-                <Input
-                  value={currentMember.name || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, name: e.target.value })}
-                  placeholder="Full Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Position *</label>
-                <Input
-                  value={currentMember.position || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, position: e.target.value })}
-                  placeholder="e.g., Executive Director"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Bio</label>
-                <Textarea
-                  rows={3}
-                  value={currentMember.bio || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, bio: e.target.value })}
-                  placeholder="Brief background and expertise..."
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Profile Image URL</label>
-                <Input
-                  value={currentMember.imageUrl || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, imageUrl: e.target.value })}
-                  placeholder="/images/team/member.jpg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <Input
-                  type="email"
-                  value={currentMember.email || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, email: e.target.value })}
-                  placeholder="email@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Phone</label>
-                <Input
-                  value={currentMember.phone || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, phone: e.target.value })}
-                  placeholder="+91 XXX XXX XXXX"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">LinkedIn Profile</label>
-                <Input
-                  value={currentMember.linkedIn || ''}
-                  onChange={(e) => setCurrentMember({ ...currentMember, linkedIn: e.target.value })}
-                  placeholder="https://linkedin.com/in/..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Display Order</label>
-                <Input
-                  type="number"
-                  value={currentMember.order || 0}
-                  onChange={(e) =>
-                    setCurrentMember({ ...currentMember, order: parseInt(e.target.value) })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={currentMember.isActive ?? true}
-                  onChange={(e) =>
-                    setCurrentMember({ ...currentMember, isActive: e.target.checked })
-                  }
-                  className="w-4 h-4 text-primary rounded focus:ring-primary"
-                />
-                <label className="text-sm font-medium">Active (visible on public website)</label>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={
-                  isSaving ||
-                  !currentMember.name ||
-                  !currentMember.position ||
-                  !permissions.canUpdate
-                }
-                className="btn-gradient-primary"
-              >
-                {isSaving ? 'Saving...' : 'Save Member'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setCurrentMember({});
-                }}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {members.length === 0 ? (
           <div className="col-span-full">
             <EmptyState
@@ -280,7 +176,7 @@ export default function TeamMembersPage() {
               description="Add your first team member to get started"
               action={
                 permissions.canCreate ? (
-                  <Button onClick={() => setIsEditing(true)} className="btn-gradient-primary">
+                  <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Team Member
                   </Button>
@@ -290,61 +186,167 @@ export default function TeamMembersPage() {
           </div>
         ) : (
           members.map((member) => (
-            <Card key={member.id} className="card-hover group overflow-hidden">
-              <div className="relative aspect-square overflow-hidden bg-linear-to-br from-primary/5 to-secondary/5">
-                {member.imageUrl ? (
-                  <img
-                    src={member.imageUrl}
-                    alt={member.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Users className="h-16 w-16 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="absolute top-2 right-2">
-                  {member.isActive ? (
-                    <CheckCircle className="h-5 w-5 text-green-600 bg-white rounded-full" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-600 bg-white rounded-full" />
-                  )}
-                </div>
-              </div>
-
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg">{member.name}</h3>
-                <p className="text-sm text-primary font-medium mb-2">{member.position}</p>
-                {member.bio && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{member.bio}</p>
-                )}
-
-                <div className="flex gap-2 pt-3 border-t opacity-0 group-hover:opacity-100 transition-smooth">
+            <AdminCard
+              key={member.id}
+              title={member.name}
+              subtitle={member.position}
+              image={member.imageUrl}
+              placeholderIcon={Users}
+              status={{ isActive: member.isActive }}
+              actions={
+                <>
                   <PermissionGate resource={Resource.TEAM_MEMBERS} action="update">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        setCurrentMember(member);
-                        setIsEditing(true);
-                      }}
-                      className="flex-1"
+                      onClick={() => handleOpenDialog(member)}
+                      className="h-8 w-8 p-0"
                     >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
+                      <Edit className="h-4 w-4" />
                     </Button>
                   </PermissionGate>
                   <PermissionGate resource={Resource.TEAM_MEMBERS} action="delete">
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(member.id)}>
-                      <Trash2 className="h-3 w-3" />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(member.id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </PermissionGate>
+                </>
+              }
+            >
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {member.bio && <p className="line-clamp-2">{member.bio}</p>}
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {member.email && (
+                    <span className="bg-muted px-2 py-1 rounded-md">{member.email}</span>
+                  )}
+                  {member.phone && (
+                    <span className="bg-muted px-2 py-1 rounded-md">{member.phone}</span>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AdminCard>
           ))
         )}
       </div>
+
+      <AdminDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={currentMember.id ? 'Edit Team Member' : 'Add New Team Member'}
+        description={
+          currentMember.id
+            ? 'Update team member details below.'
+            : 'Enter details for the new team member.'
+        }
+        onSave={handleSave}
+        isLoading={isSaving}
+        disabled={!currentMember.name || !currentMember.position}
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Name *</label>
+            <Input
+              value={currentMember.name || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, name: e.target.value })}
+              placeholder="Full Name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Position *</label>
+            <Input
+              value={currentMember.position || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, position: e.target.value })}
+              placeholder="e.g., Executive Director"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Bio</label>
+            <Textarea
+              rows={3}
+              value={currentMember.bio || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, bio: e.target.value })}
+              placeholder="Brief background and expertise..."
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Profile Image URL</label>
+            <Input
+              value={currentMember.imageUrl || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, imageUrl: e.target.value })}
+              placeholder="/images/team/member.jpg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Email</label>
+            <Input
+              type="email"
+              value={currentMember.email || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, email: e.target.value })}
+              placeholder="email@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Phone</label>
+            <Input
+              value={currentMember.phone || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, phone: e.target.value })}
+              placeholder="+91 XXX XXX XXXX"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">LinkedIn Profile</label>
+            <Input
+              value={currentMember.linkedIn || ''}
+              onChange={(e) => setCurrentMember({ ...currentMember, linkedIn: e.target.value })}
+              placeholder="https://linkedin.com/in/..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Display Order</label>
+            <Input
+              type="number"
+              value={currentMember.order || 0}
+              onChange={(e) =>
+                setCurrentMember({ ...currentMember, order: parseInt(e.target.value) })
+              }
+            />
+          </div>
+
+          <div className="flex items-center gap-3 col-span-2 pt-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={currentMember.isActive ?? true}
+              onChange={(e) => setCurrentMember({ ...currentMember, isActive: e.target.checked })}
+              className="w-4 h-4 text-primary rounded focus:ring-primary"
+            />
+            <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
+              Active (visible on public website)
+            </label>
+          </div>
+        </div>
+      </AdminDialog>
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Delete Team Member"
+        description="Are you sure you want to delete this team member? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

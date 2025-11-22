@@ -1,9 +1,10 @@
 'use client';
 
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { DeleteDialog } from '@/components/admin/DeleteDialog';
 import { PermissionGate } from '@/components/admin/PermissionGate';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingCard } from '@/components/ui/loading';
 import {
@@ -43,6 +44,10 @@ export default function ContactSubmissionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('unread');
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const permissions = usePermissions(Resource.CONTACT_SUBMISSIONS);
 
   useEffect(() => {
@@ -72,17 +77,29 @@ export default function ContactSubmissionsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this submission?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const result = await showPromiseToast(deleteContactSubmission(id), {
-      loading: 'Deleting...',
-      success: 'Submission deleted!',
-      error: 'Failed to delete submission',
-    });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    if (result.success) {
-      await fetchSubmissions();
+    setIsDeleting(true);
+    try {
+      const result = await showPromiseToast(deleteContactSubmission(deleteId), {
+        loading: 'Deleting...',
+        success: 'Submission deleted!',
+        error: 'Failed to delete submission',
+      });
+
+      if (result.success) {
+        await fetchSubmissions();
+        setIsDeleteDialogOpen(false);
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -94,27 +111,31 @@ export default function ContactSubmissionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Contact Submissions</h1>
-          <p className="text-muted-foreground mt-1">View and manage contact form submissions</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={filter === 'unread' ? 'default' : 'outline'}
-            onClick={() => setFilter('unread')}
-          >
-            Unread ({submissions.filter((s) => !s.isRead).length})
-          </Button>
-          <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
-          >
-            All ({submissions.length})
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="Contact Submissions"
+        description="View and manage contact form submissions"
+        action={
+          <div className="flex gap-2 bg-muted/50 p-1 rounded-lg">
+            <Button
+              size="sm"
+              variant={filter === 'unread' ? 'default' : 'ghost'}
+              onClick={() => setFilter('unread')}
+              className={filter === 'unread' ? 'bg-white text-primary shadow-sm' : ''}
+            >
+              Unread ({submissions.filter((s) => !s.isRead).length})
+            </Button>
+            <Button
+              size="sm"
+              variant={filter === 'all' ? 'default' : 'ghost'}
+              onClick={() => setFilter('all')}
+              className={filter === 'all' ? 'bg-white text-primary shadow-sm' : ''}
+            >
+              All ({submissions.length})
+            </Button>
+          </div>
+        }
+      />
 
       {filteredSubmissions.length === 0 ? (
         <EmptyState
@@ -129,76 +150,97 @@ export default function ContactSubmissionsPage() {
       ) : (
         <div className="space-y-4">
           {filteredSubmissions.map((submission) => (
-            <Card
+            <AdminCard
               key={submission.id}
-              className={`card-hover ${submission.isRead ? 'opacity-60' : 'border-l-4 border-l-primary'}`}
-            >
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{submission.name}</h3>
-                      {!submission.isRead && <Badge className="bg-primary text-white">New</Badge>}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-4 w-4" />
-                        <a href={`mailto:${submission.email}`} className="hover:text-primary">
-                          {submission.email}
-                        </a>
-                      </span>
-                      {submission.phone && (
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-4 w-4" />
-                          <a href={`tel:${submission.phone}`} className="hover:text-primary">
-                            {submission.phone}
-                          </a>
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(submission.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    {!submission.isRead && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMarkAsRead(submission.id)}
+              title={submission.name}
+              subtitle={
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5" />
+                    <a
+                      href={`mailto:${submission.email}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {submission.email}
+                    </a>
+                  </span>
+                  {submission.phone && (
+                    <span className="flex items-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5" />
+                      <a
+                        href={`tel:${submission.phone}`}
+                        className="hover:text-primary transition-colors"
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Mark Read
-                      </Button>
-                    )}
-                    <PermissionGate resource={Resource.CONTACT_SUBMISSIONS} action="delete">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(submission.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </PermissionGate>
-                  </div>
+                        {submission.phone}
+                      </a>
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(submission.createdAt)}
+                  </span>
                 </div>
-
+              }
+              status={{
+                isActive: !submission.isRead,
+                activeText: 'New',
+                inactiveText: 'Read',
+              }}
+              actions={
+                <>
+                  {!submission.isRead && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleMarkAsRead(submission.id)}
+                      className="h-8"
+                    >
+                      <Eye className="h-4 w-4 mr-1.5" />
+                      Mark Read
+                    </Button>
+                  )}
+                  <PermissionGate resource={Resource.CONTACT_SUBMISSIONS} action="delete">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(submission.id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </PermissionGate>
+                </>
+              }
+              className={
+                submission.isRead ? 'opacity-75 hover:opacity-100' : 'border-l-4 border-l-primary'
+              }
+            >
+              <div className="space-y-3">
                 {submission.subject && (
-                  <div className="mb-3">
-                    <span className="font-medium text-sm">Subject: </span>
-                    <span className="text-sm">{submission.subject}</span>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <span className="text-muted-foreground">Subject:</span>
+                    <span>{submission.subject}</span>
                   </div>
                 )}
-
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{submission.message}</p>
+                <div className="bg-muted/30 p-4 rounded-lg border border-muted/50">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                    {submission.message}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AdminCard>
           ))}
         </div>
       )}
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Delete Submission"
+        description="Are you sure you want to delete this submission? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

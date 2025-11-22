@@ -1,8 +1,11 @@
 'use client';
 
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminDialog } from '@/components/admin/AdminDialog';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { DeleteDialog } from '@/components/admin/DeleteDialog';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
@@ -16,7 +19,7 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
-import { CheckCircle, Edit, Image as ImageIcon, Plus, Trash2, Video, XCircle } from 'lucide-react';
+import { Edit, Image as ImageIcon, Plus, Trash2, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface GalleryItem {
@@ -36,10 +39,14 @@ interface GalleryItem {
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<Partial<GalleryItem>>({});
   const [filter, setFilter] = useState<string>('all');
   const [isSaving, setIsSaving] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.GALLERY);
 
@@ -56,6 +63,15 @@ export default function GalleryPage() {
       showError('Failed to load gallery items');
     }
     setIsLoading(false);
+  };
+
+  const handleOpenDialog = (item?: GalleryItem) => {
+    if (item) {
+      setCurrentItem(item);
+    } else {
+      setCurrentItem({ order: items.length, isActive: true, type: 'IMAGE' });
+    }
+    setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -95,7 +111,7 @@ export default function GalleryPage() {
 
       if (result.success) {
         await fetchItems();
-        setIsEditing(false);
+        setIsDialogOpen(false);
         setCurrentItem({});
       }
     } finally {
@@ -103,17 +119,29 @@ export default function GalleryPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const result = await showPromiseToast(deleteGalleryItem(id), {
-      loading: 'Deleting item...',
-      success: 'Item deleted!',
-      error: 'Failed to delete item',
-    });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    if (result.success) {
-      await fetchItems();
+    setIsDeleting(true);
+    try {
+      const result = await showPromiseToast(deleteGalleryItem(deleteId), {
+        loading: 'Deleting item...',
+        success: 'Item deleted!',
+        error: 'Failed to delete item',
+      });
+
+      if (result.success) {
+        await fetchItems();
+        setIsDeleteDialogOpen(false);
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -125,156 +153,19 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Media Gallery</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage photos and videos from events and programs
-          </p>
-        </div>
-        <PermissionGate resource={Resource.GALLERY} action="create">
-          <Button
-            onClick={() => {
-              setIsEditing(true);
-              setCurrentItem({ order: items.length, isActive: true, type: 'IMAGE' });
-            }}
-            className="btn-gradient-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Media
-          </Button>
-        </PermissionGate>
-      </div>
-
-      {isEditing && (
-        <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
-          <CardContent className="p-6 space-y-4">
-            <h3 className="font-semibold text-lg">
-              {currentItem.id ? 'Edit Media' : 'Add New Media'}
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Title *</label>
-                <Input
-                  value={currentItem.title || ''}
-                  onChange={(e) => setCurrentItem({ ...currentItem, title: e.target.value })}
-                  placeholder="Event or program name"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <Textarea
-                  rows={2}
-                  value={currentItem.description || ''}
-                  onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
-                  placeholder="Brief description..."
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Media URL *</label>
-                <Input
-                  value={
-                    (currentItem.type === 'VIDEO' ? currentItem.videoUrl : currentItem.imageUrl) ||
-                    ''
-                  }
-                  onChange={(e) => {
-                    const url = e.target.value;
-                    if (currentItem.type === 'VIDEO') {
-                      setCurrentItem({ ...currentItem, videoUrl: url });
-                    } else {
-                      setCurrentItem({ ...currentItem, imageUrl: url });
-                    }
-                  }}
-                  placeholder="/images/gallery/photo.jpg or YouTube URL"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Media Type *</label>
-                <select
-                  value={currentItem.type || 'IMAGE'}
-                  onChange={(e) => {
-                    const newType = e.target.value as 'IMAGE' | 'VIDEO';
-                    const currentUrl =
-                      currentItem.type === 'VIDEO' ? currentItem.videoUrl : currentItem.imageUrl;
-                    setCurrentItem({
-                      ...currentItem,
-                      type: newType,
-                      imageUrl: newType === 'IMAGE' ? currentUrl : undefined,
-                      videoUrl: newType === 'VIDEO' ? currentUrl : undefined,
-                    });
-                  }}
-                  className="w-full px-3 py-2 border rounded-md bg-background"
-                >
-                  <option value="IMAGE">Image</option>
-                  <option value="VIDEO">Video</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <Input
-                  value={currentItem.category || ''}
-                  onChange={(e) =>
-                    setCurrentItem({ ...currentItem, category: e.target.value || undefined })
-                  }
-                  placeholder="e.g., Events, Programs, Activities"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Display Order</label>
-                <Input
-                  type="number"
-                  value={currentItem.order || 0}
-                  onChange={(e) =>
-                    setCurrentItem({ ...currentItem, order: parseInt(e.target.value) })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={currentItem.isActive ?? true}
-                  onChange={(e) => setCurrentItem({ ...currentItem, isActive: e.target.checked })}
-                  className="w-4 h-4 text-primary rounded"
-                />
-                <label className="text-sm font-medium">Active</label>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={
-                  isSaving ||
-                  !currentItem.title ||
-                  (!currentItem.imageUrl && !currentItem.videoUrl) ||
-                  !permissions.canUpdate
-                }
-                className="btn-gradient-primary"
-              >
-                {isSaving ? 'Saving...' : 'Save Media'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setCurrentItem({});
-                }}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="Media Gallery"
+        description="Manage photos and videos from events and programs"
+        action={
+          <PermissionGate resource={Resource.GALLERY} action="create">
+            <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Media
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -296,7 +187,7 @@ export default function GalleryPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredItems.length === 0 ? (
           <div className="col-span-full">
             <EmptyState
@@ -305,7 +196,7 @@ export default function GalleryPage() {
               description="Upload your first photo or video"
               action={
                 permissions.canCreate ? (
-                  <Button onClick={() => setIsEditing(true)} className="btn-gradient-primary">
+                  <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Media
                   </Button>
@@ -317,62 +208,173 @@ export default function GalleryPage() {
           filteredItems.map((item) => {
             const mediaUrl = item.type === 'VIDEO' ? item.videoUrl : item.imageUrl;
             return (
-              <Card key={item.id} className="card-hover group overflow-hidden">
-                <div className="relative aspect-square overflow-hidden bg-muted">
-                  {item.type === 'IMAGE' && mediaUrl ? (
-                    <img
-                      src={mediaUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/10 to-secondary/10">
-                      <Video className="h-12 w-12 text-primary" />
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    {item.isActive ? (
-                      <CheckCircle className="h-5 w-5 text-green-600 bg-white rounded-full" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-600 bg-white rounded-full" />
-                    )}
+              <AdminCard
+                key={item.id}
+                title={item.title}
+                subtitle={item.category || undefined}
+                image={item.type === 'IMAGE' ? mediaUrl : undefined}
+                placeholderIcon={item.type === 'VIDEO' ? Video : ImageIcon}
+                status={{ isActive: item.isActive }}
+                actions={
+                  <>
+                    <PermissionGate resource={Resource.GALLERY} action="update">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenDialog(item)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate resource={Resource.GALLERY} action="delete">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(item.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
+                  </>
+                }
+              >
+                {item.type === 'VIDEO' && !mediaUrl && (
+                  <div className="flex items-center justify-center h-32 bg-muted rounded-md mb-2">
+                    <Video className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-smooth">
-                    <div className="flex gap-2">
-                      <PermissionGate resource={Resource.GALLERY} action="update">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => {
-                            setCurrentItem(item);
-                            setIsEditing(true);
-                          }}
-                          className="flex-1"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      </PermissionGate>
-                      <PermissionGate resource={Resource.GALLERY} action="delete">
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </PermissionGate>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-sm line-clamp-1">{item.title}</h3>
-                  <p className="text-xs text-muted-foreground">{item.category}</p>
-                </div>
-              </Card>
+                )}
+                {item.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                    {item.description}
+                  </p>
+                )}
+              </AdminCard>
             );
           })
         )}
       </div>
+
+      <AdminDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={currentItem.id ? 'Edit Media' : 'Add New Media'}
+        description={
+          currentItem.id
+            ? 'Update media details below.'
+            : 'Upload a new photo or video to the gallery.'
+        }
+        onSave={handleSave}
+        isLoading={isSaving}
+        disabled={
+          !currentItem.title ||
+          (!currentItem.imageUrl && !currentItem.videoUrl && currentItem.type === 'IMAGE')
+        }
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Title *</label>
+            <Input
+              value={currentItem.title || ''}
+              onChange={(e) => setCurrentItem({ ...currentItem, title: e.target.value })}
+              placeholder="Event or program name"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Description</label>
+            <Textarea
+              rows={2}
+              value={currentItem.description || ''}
+              onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
+              placeholder="Brief description..."
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Media URL *</label>
+            <Input
+              value={
+                (currentItem.type === 'VIDEO' ? currentItem.videoUrl : currentItem.imageUrl) || ''
+              }
+              onChange={(e) => {
+                const url = e.target.value;
+                if (currentItem.type === 'VIDEO') {
+                  setCurrentItem({ ...currentItem, videoUrl: url });
+                } else {
+                  setCurrentItem({ ...currentItem, imageUrl: url });
+                }
+              }}
+              placeholder="/images/gallery/photo.jpg or YouTube URL"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Media Type *</label>
+            <select
+              value={currentItem.type || 'IMAGE'}
+              onChange={(e) => {
+                const newType = e.target.value as 'IMAGE' | 'VIDEO';
+                const currentUrl =
+                  currentItem.type === 'VIDEO' ? currentItem.videoUrl : currentItem.imageUrl;
+                setCurrentItem({
+                  ...currentItem,
+                  type: newType,
+                  imageUrl: newType === 'IMAGE' ? currentUrl : undefined,
+                  videoUrl: newType === 'VIDEO' ? currentUrl : undefined,
+                });
+              }}
+              className="w-full px-3 py-2 border rounded-md bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+            >
+              <option value="IMAGE">Image</option>
+              <option value="VIDEO">Video</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Category</label>
+            <Input
+              value={currentItem.category || ''}
+              onChange={(e) =>
+                setCurrentItem({ ...currentItem, category: e.target.value || undefined })
+              }
+              placeholder="e.g., Events, Programs"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Display Order</label>
+            <Input
+              type="number"
+              value={currentItem.order || 0}
+              onChange={(e) => setCurrentItem({ ...currentItem, order: parseInt(e.target.value) })}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-8">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={currentItem.isActive ?? true}
+              onChange={(e) => setCurrentItem({ ...currentItem, isActive: e.target.checked })}
+              className="w-4 h-4 text-primary rounded focus:ring-primary"
+            />
+            <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
+              Active
+            </label>
+          </div>
+        </div>
+      </AdminDialog>
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Delete Media"
+        description="Are you sure you want to delete this media item? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

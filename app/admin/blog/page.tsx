@@ -1,10 +1,13 @@
 'use client';
 
 import { RichTextEditor } from '@/components/RichTextEditor';
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminDialog } from '@/components/admin/AdminDialog';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { DeleteDialog } from '@/components/admin/DeleteDialog';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
@@ -13,7 +16,7 @@ import { createBlogPost, deleteBlogPost, getBlogPosts, updateBlogPost } from '@/
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
-import { Calendar, Edit, Eye, EyeOff, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Edit, FileText, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface BlogPost {
@@ -35,13 +38,17 @@ interface BlogPost {
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<Partial<BlogPost>>({
     tags: [],
     isPublished: false,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [tagInput, setTagInput] = useState('');
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.BLOG_POSTS);
 
@@ -58,6 +65,15 @@ export default function BlogPage() {
       showError('Failed to load blog posts');
     }
     setIsLoading(false);
+  };
+
+  const handleOpenDialog = (post?: BlogPost) => {
+    if (post) {
+      setCurrentPost(post);
+    } else {
+      setCurrentPost({ tags: [], isPublished: false });
+    }
+    setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -90,7 +106,7 @@ export default function BlogPage() {
 
       if (result.success) {
         await fetchPosts();
-        setIsEditing(false);
+        setIsDialogOpen(false);
         setCurrentPost({ tags: [], isPublished: false });
       }
     } catch (error) {
@@ -100,18 +116,29 @@ export default function BlogPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const promise = deleteBlogPost(id);
-    const result = await showPromiseToast(promise, {
-      loading: 'Deleting post...',
-      success: 'Post deleted successfully!',
-      error: 'Failed to delete post',
-    });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    if (result.success) {
-      await fetchPosts();
+    setIsDeleting(true);
+    try {
+      const result = await showPromiseToast(deleteBlogPost(deleteId), {
+        loading: 'Deleting post...',
+        success: 'Post deleted successfully!',
+        error: 'Failed to delete post',
+      });
+
+      if (result.success) {
+        await fetchPosts();
+        setIsDeleteDialogOpen(false);
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -137,168 +164,21 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Blog & News</h1>
-          <p className="text-muted-foreground mt-1">
-            Create and manage blog posts and news updates
-          </p>
-        </div>
-        <PermissionGate resource={Resource.BLOG_POSTS} action="create">
-          <Button
-            onClick={() => {
-              setIsEditing(true);
-              setCurrentPost({ tags: [], isPublished: false });
-            }}
-            className="btn-gradient-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Post
-          </Button>
-        </PermissionGate>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="Blog & News"
+        description="Create and manage blog posts and news updates"
+        action={
+          <PermissionGate resource={Resource.BLOG_POSTS} action="create">
+            <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              New Post
+            </Button>
+          </PermissionGate>
+        }
+      />
 
-      {isEditing && (
-        <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
-          <CardHeader className="bg-linear-to-r from-primary/5 to-transparent">
-            <CardTitle>{currentPost.id ? 'Edit Post' : 'Create New Post'}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Title *</label>
-              <Input
-                value={currentPost.title || ''}
-                onChange={(e) => setCurrentPost({ ...currentPost, title: e.target.value })}
-                placeholder="Enter post title"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Slug (URL)</label>
-              <Input
-                value={currentPost.slug || ''}
-                onChange={(e) => setCurrentPost({ ...currentPost, slug: e.target.value })}
-                placeholder="auto-generated-from-title"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Leave blank to auto-generate from title
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Excerpt</label>
-              <Textarea
-                value={currentPost.excerpt || ''}
-                onChange={(e) => setCurrentPost({ ...currentPost, excerpt: e.target.value })}
-                placeholder="Brief summary (optional)"
-                rows={2}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Content *</label>
-              <RichTextEditor
-                content={currentPost.content || ''}
-                onChange={(content) => setCurrentPost({ ...currentPost, content })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Featured Image URL</label>
-              <Input
-                value={currentPost.imageUrl || ''}
-                onChange={(e) => setCurrentPost({ ...currentPost, imageUrl: e.target.value })}
-                placeholder="/images/blog/post-image.jpg"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Author *</label>
-                <Input
-                  value={currentPost.author || ''}
-                  onChange={(e) => setCurrentPost({ ...currentPost, author: e.target.value })}
-                  placeholder="Author name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <Input
-                  value={currentPost.category || ''}
-                  onChange={(e) => setCurrentPost({ ...currentPost, category: e.target.value })}
-                  placeholder="e.g., Success Stories"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Tags</label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  placeholder="Add a tag"
-                />
-                <Button type="button" onClick={addTag} variant="outline">
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {currentPost.tags?.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => removeTag(tag)}
-                  >
-                    {tag} ×
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
-              <input
-                type="checkbox"
-                checked={currentPost.isPublished || false}
-                onChange={(e) => setCurrentPost({ ...currentPost, isPublished: e.target.checked })}
-                className="w-4 h-4 text-primary rounded focus:ring-primary"
-              />
-              <label className="text-sm font-medium">
-                {currentPost.isPublished
-                  ? 'Published (visible on website)'
-                  : 'Draft (not published)'}
-              </label>
-            </div>
-
-            <div className="flex gap-2 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || !permissions.canUpdate}
-                className="btn-gradient-primary"
-              >
-                {isSaving ? 'Saving...' : currentPost.id ? 'Update Post' : 'Create Post'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setCurrentPost({ tags: [], isPublished: false });
-                }}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Posts List */}
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {posts.length === 0 ? (
           <EmptyState
             icon={Calendar}
@@ -306,7 +186,7 @@ export default function BlogPage() {
             description="Create your first post to get started"
             action={
               permissions.canCreate ? (
-                <Button onClick={() => setIsEditing(true)} className="btn-gradient-primary">
+                <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Post
                 </Button>
@@ -315,74 +195,212 @@ export default function BlogPage() {
           />
         ) : (
           posts.map((post) => (
-            <Card key={post.id} className="card-hover">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold">{post.title}</h3>
-                      <Badge variant={post.isPublished ? 'default' : 'secondary'}>
-                        {post.isPublished ? (
-                          <>
-                            <Eye className="h-3 w-3 mr-1" /> Published
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="h-3 w-3 mr-1" /> Draft
-                          </>
-                        )}
-                      </Badge>
-                      {post.category && <Badge variant="outline">{post.category}</Badge>}
-                    </div>
-
-                    {post.excerpt && (
-                      <p className="text-muted-foreground mb-3 line-clamp-2">{post.excerpt}</p>
-                    )}
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>By {post.author}</span>
+            <AdminCard
+              key={post.id}
+              title={post.title}
+              subtitle={post.category || undefined}
+              image={post.imageUrl}
+              placeholderIcon={FileText}
+              status={{
+                isActive: post.isPublished,
+                activeText: 'Published',
+                inactiveText: 'Draft',
+              }}
+              actions={
+                <>
+                  <PermissionGate resource={Resource.BLOG_POSTS} action="update">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOpenDialog(post)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </PermissionGate>
+                  <PermissionGate resource={Resource.BLOG_POSTS} action="delete">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(post.id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </PermissionGate>
+                </>
+              }
+            >
+              <div className="space-y-3">
+                {post.excerpt && (
+                  <p className="text-muted-foreground line-clamp-2 text-sm">{post.excerpt}</p>
+                )}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <span className="font-medium text-foreground">Author:</span> {post.author}
+                  </span>
+                  <span>•</span>
+                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  {post.tags.length > 0 && (
+                    <>
                       <span>•</span>
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                      {post.tags.length > 0 && (
-                        <>
-                          <span>•</span>
-                          <div className="flex gap-1">
-                            {post.tags.slice(0, 3).map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <PermissionGate resource={Resource.BLOG_POSTS} action="update">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setCurrentPost(post);
-                          setIsEditing(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </PermissionGate>
-                    <PermissionGate resource={Resource.BLOG_POSTS} action="delete">
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(post.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </PermissionGate>
-                  </div>
+                      <div className="flex gap-1">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-[10px] h-5 px-1.5">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {post.tags.length > 3 && (
+                          <span className="text-[10px] self-center">
+                            +{post.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AdminCard>
           ))
         )}
       </div>
+
+      <AdminDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={currentPost.id ? 'Edit Post' : 'Create New Post'}
+        description={
+          currentPost.id
+            ? 'Update blog post content and settings.'
+            : 'Write and publish a new blog post.'
+        }
+        onSave={handleSave}
+        isLoading={isSaving}
+        disabled={!currentPost.title || !currentPost.content || !currentPost.author}
+        className="sm:max-w-[800px]"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Title *</label>
+            <Input
+              value={currentPost.title || ''}
+              onChange={(e) => setCurrentPost({ ...currentPost, title: e.target.value })}
+              placeholder="Enter post title"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Slug (URL)</label>
+            <Input
+              value={currentPost.slug || ''}
+              onChange={(e) => setCurrentPost({ ...currentPost, slug: e.target.value })}
+              placeholder="auto-generated-from-title"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Leave blank to auto-generate from title
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Excerpt</label>
+            <Textarea
+              value={currentPost.excerpt || ''}
+              onChange={(e) => setCurrentPost({ ...currentPost, excerpt: e.target.value })}
+              placeholder="Brief summary (optional)"
+              rows={2}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Content *</label>
+            <RichTextEditor
+              content={currentPost.content || ''}
+              onChange={(content) => setCurrentPost({ ...currentPost, content })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Featured Image URL</label>
+            <Input
+              value={currentPost.imageUrl || ''}
+              onChange={(e) => setCurrentPost({ ...currentPost, imageUrl: e.target.value })}
+              placeholder="/images/blog/post-image.jpg"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Author *</label>
+              <Input
+                value={currentPost.author || ''}
+                onChange={(e) => setCurrentPost({ ...currentPost, author: e.target.value })}
+                placeholder="Author name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Category</label>
+              <Input
+                value={currentPost.category || ''}
+                onChange={(e) => setCurrentPost({ ...currentPost, category: e.target.value })}
+                placeholder="e.g., Success Stories"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Tags</label>
+            <div className="flex gap-2 mb-2">
+              <Input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                placeholder="Add a tag"
+              />
+              <Button type="button" onClick={addTag} variant="outline">
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 border rounded-md bg-muted/10">
+              {currentPost.tags?.length === 0 && (
+                <span className="text-sm text-muted-foreground italic">No tags added</span>
+              )}
+              {currentPost.tags?.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  onClick={() => removeTag(tag)}
+                >
+                  {tag} ×
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg border border-muted">
+            <input
+              type="checkbox"
+              id="isPublished"
+              checked={currentPost.isPublished || false}
+              onChange={(e) => setCurrentPost({ ...currentPost, isPublished: e.target.checked })}
+              className="w-4 h-4 text-primary rounded focus:ring-primary"
+            />
+            <label htmlFor="isPublished" className="text-sm font-medium cursor-pointer select-none">
+              {currentPost.isPublished ? 'Published (visible on website)' : 'Draft (not published)'}
+            </label>
+          </div>
+        </div>
+      </AdminDialog>
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Delete Post"
+        description="Are you sure you want to delete this blog post? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

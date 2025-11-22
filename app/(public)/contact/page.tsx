@@ -1,9 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { Clock, Mail, MapPin, Phone } from 'lucide-react';
 import { Metadata } from 'next';
+import ContactForm from './contact-form';
 
 export const metadata: Metadata = {
   title: 'Contact Us - Agraani Welfare Foundation',
@@ -107,83 +105,7 @@ export default function ContactPage() {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
 
-                <form action="/api/contact" method="POST" className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">
-                        Your Name *
-                      </label>
-                      <Input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        placeholder="John Doe"
-                        className="w-full"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">
-                        Email Address *
-                      </label>
-                      <Input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                        placeholder="john@example.com"
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                      Phone Number
-                    </label>
-                    <Input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      placeholder="+91 XXXXX XXXXX"
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                      Subject *
-                    </label>
-                    <Input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      required
-                      placeholder="How can we help?"
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2">
-                      Message *
-                    </label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      required
-                      rows={6}
-                      placeholder="Tell us more about your inquiry..."
-                      className="w-full resize-none"
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full btn-gradient-primary text-lg py-6">
-                    <Send className="h-5 w-5 mr-2" />
-                    Send Message
-                  </Button>
-                </form>
+                <ContactForm />
               </CardContent>
             </Card>
           </div>

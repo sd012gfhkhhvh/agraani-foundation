@@ -1,5 +1,7 @@
 'use client';
 
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { RoleBadge } from '@/components/admin/RoleBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -88,13 +90,11 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gradient-primary">User Management</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage user roles and permissions (Super Admin Only)
-        </p>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="User Management"
+        description="Manage user roles and permissions (Super Admin Only)"
+      />
 
       {users.length === 0 ? (
         <EmptyState
@@ -105,136 +105,142 @@ export default function UsersPage() {
       ) : (
         <div className="grid gap-4">
           {users.map((user) => (
-            <Card key={user.id} className="card-hover">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      {user.image ? (
-                        <img
-                          src={user.image}
-                          alt={user.name || 'User'}
-                          className="h-12 w-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="h-6 w-6 text-primary" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold">{user.name || 'Unnamed User'}</h3>
-                      <p className="text-sm text-muted-foreground">{user.email || 'No email'}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {editingUser === user.id ? (
-                          <select
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                            className="text-xs border rounded px-2 py-1 bg-background"
-                          >
-                            <option value={UserRole.SUPER_ADMIN}>Super Admin</option>
-                            <option value={UserRole.CONTENT_ADMIN}>Content Admin</option>
-                            <option value={UserRole.EDITOR}>Editor</option>
-                            <option value={UserRole.VIEWER}>Viewer</option>
-                          </select>
-                        ) : (
-                          user.role && <RoleBadge role={user.role} />
-                        )}
-                      </div>
-                    </div>
+            <AdminCard
+              key={user.id}
+              title={user.name || 'Unnamed User'}
+              subtitle={user.email || 'No email'}
+              image={user.image}
+              actions={
+                editingUser === user.id ? (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleUpdateRole(user.id, selectedRole)}
+                      className="btn-gradient-primary"
+                    >
+                      Save
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingUser(null)}>
+                      Cancel
+                    </Button>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-sm text-muted-foreground text-right">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-
-                    {editingUser === user.id ? (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleUpdateRole(user.id, selectedRole)}
-                          className="btn-gradient-primary"
-                        >
-                          Save
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingUser(null)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingUser(user.id);
-                          setSelectedRole(user.role || UserRole.VIEWER);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Change Role
-                      </Button>
-                    )}
-                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingUser(user.id);
+                      setSelectedRole(user.role || UserRole.VIEWER);
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Change Role
+                  </Button>
+                )
+              }
+            >
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Current Role:</span>
+                  {editingUser === user.id ? (
+                    <select
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                      className="text-sm border rounded px-2 py-1 bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    >
+                      <option value={UserRole.SUPER_ADMIN}>Super Admin</option>
+                      <option value={UserRole.CONTENT_ADMIN}>Content Admin</option>
+                      <option value={UserRole.EDITOR}>Editor</option>
+                      <option value={UserRole.VIEWER}>Viewer</option>
+                    </select>
+                  ) : (
+                    user.role && <RoleBadge role={user.role} />
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </AdminCard>
           ))}
         </div>
       )}
 
-      <Card className="bg-muted/50">
-        <CardHeader>
-          <CardTitle className="text-sm">Role Permissions</CardTitle>
+      <Card className="bg-muted/30 border-muted/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Role Permissions Guide
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-            <div>
-              <Badge className="bg-purple-100 text-purple-800 border-purple-300 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+            <div className="space-y-2">
+              <Badge className="bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-100 mb-1">
                 <Shield className="h-3 w-3 mr-1" />
                 Super Admin
               </Badge>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Full system access</li>
-                <li>• User management</li>
-                <li>• All content operations</li>
+              <ul className="space-y-1.5 text-muted-foreground text-xs">
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-purple-400" /> Full system access
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-purple-400" /> User management
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-purple-400" /> All content operations
+                </li>
               </ul>
             </div>
-            <div>
-              <Badge className="bg-blue-100 text-blue-800 border-blue-300 mb-2">
+            <div className="space-y-2">
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100 mb-1">
                 <Shield className="h-3 w-3 mr-1" />
                 Content Admin
               </Badge>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Manage all content</li>
-                <li>• Create, edit & delete</li>
-                <li>• Publish content</li>
+              <ul className="space-y-1.5 text-muted-foreground text-xs">
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Manage all content
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Create, edit & delete
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Publish content
+                </li>
               </ul>
             </div>
-            <div>
-              <Badge className="bg-green-100 text-green-800 border-green-300 mb-2">
+            <div className="space-y-2">
+              <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100 mb-1">
                 <Shield className="h-3 w-3 mr-1" />
                 Editor
               </Badge>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Create & edit content</li>
-                <li>• Publish content</li>
-                <li>• Cannot delete</li>
+              <ul className="space-y-1.5 text-muted-foreground text-xs">
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-400" /> Create & edit content
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-400" /> Publish content
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-400" /> Cannot delete
+                </li>
               </ul>
             </div>
-            <div>
-              <Badge className="bg-gray-100 text-gray-800 border-gray-300 mb-2">
+            <div className="space-y-2">
+              <Badge className="bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100 mb-1">
                 <Shield className="h-3 w-3 mr-1" />
                 Viewer
               </Badge>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• View dashboard</li>
-                <li>• View content</li>
-                <li>• No edit/delete rights</li>
+              <ul className="space-y-1.5 text-muted-foreground text-xs">
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-gray-400" /> View dashboard
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-gray-400" /> View content
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-gray-400" /> No edit/delete rights
+                </li>
               </ul>
             </div>
           </div>

@@ -1,8 +1,11 @@
 'use client';
 
+import { AdminCard } from '@/components/admin/AdminCard';
+import { AdminDialog } from '@/components/admin/AdminDialog';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { DeleteDialog } from '@/components/admin/DeleteDialog';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
@@ -36,10 +39,14 @@ interface LegalDocument {
 export default function LegalDocumentsPage() {
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentDoc, setCurrentDoc] = useState<Partial<LegalDocument>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [viewingDoc, setViewingDoc] = useState<LegalDocument | null>(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.LEGAL_DOCUMENTS);
 
@@ -56,6 +63,15 @@ export default function LegalDocumentsPage() {
       showError('Failed to load legal documents');
     }
     setIsLoading(false);
+  };
+
+  const handleOpenDialog = (doc?: LegalDocument) => {
+    if (doc) {
+      setCurrentDoc(doc);
+    } else {
+      setCurrentDoc({ order: documents.length });
+    }
+    setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -77,8 +93,12 @@ export default function LegalDocumentsPage() {
             documentType: currentDoc.documentType,
             registrationNumber: currentDoc.registrationNumber,
             validity: currentDoc.validity,
-            issueDate: currentDoc.issueDate ?? undefined,
-            expiryDate: currentDoc.expiryDate ?? undefined,
+            issueDate: currentDoc.issueDate
+              ? new Date(currentDoc.issueDate).toISOString()
+              : undefined,
+            expiryDate: currentDoc.expiryDate
+              ? new Date(currentDoc.expiryDate).toISOString()
+              : undefined,
             fileUrl: currentDoc.fileUrl ?? undefined,
             notes: currentDoc.notes ?? undefined,
             order: currentDoc.order,
@@ -88,8 +108,12 @@ export default function LegalDocumentsPage() {
             documentType: currentDoc.documentType,
             registrationNumber: currentDoc.registrationNumber,
             validity: currentDoc.validity,
-            issueDate: currentDoc.issueDate ?? undefined,
-            expiryDate: currentDoc.expiryDate ?? undefined,
+            issueDate: currentDoc.issueDate
+              ? new Date(currentDoc.issueDate).toISOString()
+              : undefined,
+            expiryDate: currentDoc.expiryDate
+              ? new Date(currentDoc.expiryDate).toISOString()
+              : undefined,
             fileUrl: currentDoc.fileUrl ?? undefined,
             notes: currentDoc.notes ?? undefined,
             order: currentDoc.order ?? documents.length,
@@ -103,7 +127,7 @@ export default function LegalDocumentsPage() {
 
       if (result.success) {
         await fetchDocuments();
-        setIsEditing(false);
+        setIsDialogOpen(false);
         setCurrentDoc({});
       }
     } finally {
@@ -111,17 +135,29 @@ export default function LegalDocumentsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const result = await showPromiseToast(deleteLegalDocument(id), {
-      loading: 'Deleting document...',
-      success: 'Document deleted!',
-      error: 'Failed to delete document',
-    });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
-    if (result.success) {
-      await fetchDocuments();
+    setIsDeleting(true);
+    try {
+      const result = await showPromiseToast(deleteLegalDocument(deleteId), {
+        loading: 'Deleting document...',
+        success: 'Document deleted!',
+        error: 'Failed to delete document',
+      });
+
+      if (result.success) {
+        await fetchDocuments();
+        setIsDeleteDialogOpen(false);
+        setDeleteId(null);
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -129,217 +165,20 @@ export default function LegalDocumentsPage() {
     return <LoadingCard />;
   }
 
-  // View modal
-  if (viewingDoc) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gradient-primary">{viewingDoc.name}</h1>
-          <Button variant="outline" onClick={() => setViewingDoc(null)}>
-            ← Back to List
-          </Button>
-        </div>
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Document Type</label>
-                <p className="mt-1">{viewingDoc.documentType}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  Registration Number
-                </label>
-                <p className="mt-1 font-mono">{viewingDoc.registrationNumber}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Validity</label>
-                <p className="mt-1">{viewingDoc.validity}</p>
-              </div>
-              {viewingDoc.issueDate && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Issue Date</label>
-                  <p className="mt-1">{new Date(viewingDoc.issueDate).toLocaleDateString()}</p>
-                </div>
-              )}
-              {viewingDoc.expiryDate && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Expiry Date</label>
-                  <p className="mt-1">{new Date(viewingDoc.expiryDate).toLocaleDateString()}</p>
-                </div>
-              )}
-              {viewingDoc.fileUrl && (
-                <div className="col-span-2">
-                  <label className="text-sm font-medium text-muted-foreground">Document File</label>
-                  <p className="mt-1">
-                    <a
-                      href={viewingDoc.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      View Document →
-                    </a>
-                  </p>
-                </div>
-              )}
-              {viewingDoc.notes && (
-                <div className="col-span-2">
-                  <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                  <p className="mt-1 whitespace-pre-wrap">{viewingDoc.notes}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Legal & Compliance</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage organizational registrations and certifications
-          </p>
-        </div>
-        <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="create">
-          <Button
-            onClick={() => {
-              setIsEditing(true);
-              setCurrentDoc({ order: documents.length });
-            }}
-            className="btn-gradient-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Document
-          </Button>
-        </PermissionGate>
-      </div>
-
-      {isEditing && (
-        <Card className="border-2 border-primary/20 shadow-lg animate-fade-in">
-          <CardHeader>
-            <CardTitle>{currentDoc.id ? 'Edit Document' : 'Add New Document'}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Document Name *</label>
-                <Input
-                  value={currentDoc.name || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, name: e.target.value })}
-                  placeholder="e.g., 80G Tax Exemption Certificate"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Document Type *</label>
-                <Input
-                  value={currentDoc.documentType || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, documentType: e.target.value })}
-                  placeholder="e.g., 80G, FCRA, 12A"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Registration Number *</label>
-                <Input
-                  value={currentDoc.registrationNumber || ''}
-                  onChange={(e) =>
-                    setCurrentDoc({ ...currentDoc, registrationNumber: e.target.value })
-                  }
-                  placeholder="e.g., 80G/2024/ABC123"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Validity *</label>
-                <Input
-                  value={currentDoc.validity || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, validity: e.target.value })}
-                  placeholder="e.g., Perpetual, 5 years"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Issue Date</label>
-                <Input
-                  type="date"
-                  value={
-                    currentDoc.issueDate
-                      ? new Date(currentDoc.issueDate).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, issueDate: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Expiry Date</label>
-                <Input
-                  type="date"
-                  value={
-                    currentDoc.expiryDate
-                      ? new Date(currentDoc.expiryDate).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, expiryDate: e.target.value })}
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Document URL</label>
-                <Input
-                  value={currentDoc.fileUrl || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, fileUrl: e.target.value })}
-                  placeholder="/documents/80g-certificate.pdf"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-2">Notes</label>
-                <textarea
-                  rows={3}
-                  value={currentDoc.notes || ''}
-                  onChange={(e) => setCurrentDoc({ ...currentDoc, notes: e.target.value })}
-                  placeholder="Additional notes about this document..."
-                  className="w-full px-3 py-2 border rounded-md bg-background resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={
-                  isSaving ||
-                  !currentDoc.name ||
-                  !currentDoc.documentType ||
-                  !currentDoc.registrationNumber ||
-                  !currentDoc.validity ||
-                  !permissions.canUpdate
-                }
-                className="btn-gradient-primary"
-              >
-                {isSaving ? 'Saving...' : 'Save Document'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setCurrentDoc({});
-                }}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+    <div className="space-y-8 animate-fade-in">
+      <AdminPageHeader
+        title="Legal & Compliance"
+        description="Manage organizational registrations and certifications"
+        action={
+          <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="create">
+            <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Document
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="grid gap-4">
         {documents.length === 0 ? (
@@ -349,7 +188,7 @@ export default function LegalDocumentsPage() {
             description="Add your first compliance document or certification"
             action={
               permissions.canCreate ? (
-                <Button onClick={() => setIsEditing(true)} className="btn-gradient-primary">
+                <Button onClick={() => handleOpenDialog()} className="btn-gradient-primary">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Document
                 </Button>
@@ -358,63 +197,245 @@ export default function LegalDocumentsPage() {
           />
         ) : (
           documents.map((doc) => (
-            <Card key={doc.id} className="card-hover">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-lg">{doc.name}</h3>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <p className="text-muted-foreground">
-                        <span className="font-medium">Type:</span> {doc.documentType}
-                      </p>
-                      <p className="text-muted-foreground">
-                        <span className="font-medium">Registration:</span>{' '}
-                        <span className="font-mono">{doc.registrationNumber}</span>
-                      </p>
-                      <p className="text-muted-foreground">
-                        <span className="font-medium">Validity:</span> {doc.validity}
-                      </p>
-                      {doc.expiryDate && (
-                        <p className="text-muted-foreground">
-                          <span className="font-medium">Expires:</span>{' '}
-                          {new Date(doc.expiryDate).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setViewingDoc(doc)}>
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
+            <AdminCard
+              key={doc.id}
+              title={doc.name}
+              subtitle={doc.documentType}
+              actions={
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setViewingDoc(doc)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="update">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOpenDialog(doc)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-4 w-4" />
                     </Button>
-                    <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="update">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setCurrentDoc(doc);
-                          setIsEditing(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </PermissionGate>
-                    <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="delete">
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(doc.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </PermissionGate>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </PermissionGate>
+                  <PermissionGate resource={Resource.LEGAL_DOCUMENTS} action="delete">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(doc.id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </PermissionGate>
+                </>
+              }
+            >
+              <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                <p>
+                  <span className="font-medium">Registration:</span>{' '}
+                  <span className="font-mono">{doc.registrationNumber}</span>
+                </p>
+                <p>
+                  <span className="font-medium">Validity:</span> {doc.validity}
+                </p>
+                {doc.expiryDate && (
+                  <p>
+                    <span className="font-medium">Expires:</span>{' '}
+                    {new Date(doc.expiryDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            </AdminCard>
           ))
         )}
       </div>
+
+      {/* Edit/Create Dialog */}
+      <AdminDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={currentDoc.id ? 'Edit Document' : 'Add New Document'}
+        description={
+          currentDoc.id
+            ? 'Update document details below.'
+            : 'Enter details for the new compliance document.'
+        }
+        onSave={handleSave}
+        isLoading={isSaving}
+        disabled={
+          !currentDoc.name ||
+          !currentDoc.documentType ||
+          !currentDoc.registrationNumber ||
+          !currentDoc.validity
+        }
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Document Name *</label>
+            <Input
+              value={currentDoc.name || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, name: e.target.value })}
+              placeholder="e.g., 80G Tax Exemption Certificate"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Document Type *</label>
+            <Input
+              value={currentDoc.documentType || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, documentType: e.target.value })}
+              placeholder="e.g., 80G, FCRA, 12A"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Registration Number *</label>
+            <Input
+              value={currentDoc.registrationNumber || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, registrationNumber: e.target.value })}
+              placeholder="e.g., 80G/2024/ABC123"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Validity *</label>
+            <Input
+              value={currentDoc.validity || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, validity: e.target.value })}
+              placeholder="e.g., Perpetual, 5 years"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Issue Date</label>
+            <Input
+              type="date"
+              value={
+                currentDoc.issueDate
+                  ? new Date(currentDoc.issueDate).toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) => setCurrentDoc({ ...currentDoc, issueDate: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Expiry Date</label>
+            <Input
+              type="date"
+              value={
+                currentDoc.expiryDate
+                  ? new Date(currentDoc.expiryDate).toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) => setCurrentDoc({ ...currentDoc, expiryDate: e.target.value })}
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Document URL</label>
+            <Input
+              value={currentDoc.fileUrl || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, fileUrl: e.target.value })}
+              placeholder="/documents/80g-certificate.pdf"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Notes</label>
+            <textarea
+              rows={3}
+              value={currentDoc.notes || ''}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, notes: e.target.value })}
+              placeholder="Additional notes about this document..."
+              className="w-full px-3 py-2 border rounded-md bg-background resize-none focus:ring-2 focus:ring-primary focus:outline-none"
+            />
+          </div>
+        </div>
+      </AdminDialog>
+
+      {/* View Dialog */}
+      <AdminDialog
+        open={!!viewingDoc}
+        onOpenChange={(open) => !open && setViewingDoc(null)}
+        title={viewingDoc?.name || ''}
+        description="Document Details"
+        actions={
+          <Button variant="outline" onClick={() => setViewingDoc(null)}>
+            Close
+          </Button>
+        }
+      >
+        {viewingDoc && (
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Document Type</label>
+              <p className="mt-1 font-medium">{viewingDoc.documentType}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">
+                Registration Number
+              </label>
+              <p className="mt-1 font-mono bg-muted px-2 py-1 rounded-md inline-block">
+                {viewingDoc.registrationNumber}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Validity</label>
+              <p className="mt-1">{viewingDoc.validity}</p>
+            </div>
+            {viewingDoc.issueDate && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Issue Date</label>
+                <p className="mt-1">{new Date(viewingDoc.issueDate).toLocaleDateString()}</p>
+              </div>
+            )}
+            {viewingDoc.expiryDate && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Expiry Date</label>
+                <p className="mt-1">{new Date(viewingDoc.expiryDate).toLocaleDateString()}</p>
+              </div>
+            )}
+            {viewingDoc.fileUrl && (
+              <div className="col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">Document File</label>
+                <p className="mt-1">
+                  <a
+                    href={viewingDoc.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    View Document
+                  </a>
+                </p>
+              </div>
+            )}
+            {viewingDoc.notes && (
+              <div className="col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                <p className="mt-1 whitespace-pre-wrap bg-muted/30 p-3 rounded-md text-sm">
+                  {viewingDoc.notes}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </AdminDialog>
+
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Delete Document"
+        description="Are you sure you want to delete this document? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
