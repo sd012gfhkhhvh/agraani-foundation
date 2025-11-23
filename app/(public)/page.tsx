@@ -1,3 +1,5 @@
+import { AnimatedCounter } from '@/components/public/animated-counter';
+import { ImageWithFallback } from '@/components/public/image-with-fallback';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getActiveHeroBanners, getActiveObjectives, getActivePrograms } from '@/lib/data';
@@ -21,23 +23,41 @@ export default async function HomePage() {
   ]);
 
   const hero = heroBanners[0];
+  const heroImage = hero?.imageUrl || '/placeholders/heroes/empowerment.png';
 
   return (
     <div className="min-h-screen">
-      {/* Modern Hero Section */}
+      {/* Modern Hero Section with Parallax */}
       <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
-        {/* Background with gradient overlay */}
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-linear-to-br from-primary via-secondary to-accent animate-gradient-xy" />
+
+        {/* Hero Image with overlay */}
         <div className="absolute inset-0">
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center opacity-40"
             style={{
-              backgroundImage: hero?.imageUrl
-                ? `url(${hero.imageUrl})`
-                : 'linear-gradient(135deg, #2D5F3F 0%, #4A8B63 100%)',
+              backgroundImage: `url(${heroImage})`,
+              backgroundAttachment: 'fixed',
             }}
           />
           <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.1),transparent_50%)]" />
+        </div>
+
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white/20 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${5 + Math.random() * 10}s`,
+              }}
+            />
+          ))}
         </div>
 
         {/* Content */}
@@ -48,24 +68,24 @@ export default async function HomePage() {
               <span className="text-sm font-medium">Transforming Lives Since 2020</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-fade-in">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               {hero?.title || 'Empowering Women,'}
               <br />
-              <span className="text-gradient-secondary">
+              <span className="text-gradient-secondary animate-pulse">
                 {hero?.subtitle || 'Transforming Communities'}
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed animate-fade-in">
+            <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
               {hero?.description ||
                 'Join us in creating sustainable change through education, skill development, and community empowerment across West Bengal.'}
             </p>
 
-            <div className="flex flex-wrap gap-4 animate-fade-in">
+            <div className="flex flex-wrap gap-4">
               <Button
                 asChild
                 size="lg"
-                className="btn-gradient-secondary text-lg px-8 py-6 hover:scale-105 transition-smooth"
+                className="btn-gradient-secondary text-lg px-8 py-6 hover:scale-105 transition-smooth shadow-2xl"
               >
                 <Link href="/donate">
                   <Heart className="h-5 w-5 mr-2" />
@@ -95,20 +115,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Impact Stats */}
+      {/* Impact Stats with Animated Counters */}
       <section className="py-16 bg-linear-to-b from-background to-muted/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '1000+', label: 'Women Empowered', icon: Users },
-              { value: '50+', label: 'Villages Reached', icon: Target },
-              { value: '15+', label: 'Active Programs', icon: Sparkles },
-              { value: '5+', label: 'Years of Impact', icon: Heart },
+              { value: 1000, label: 'Women Empowered', icon: Users, suffix: '+' },
+              { value: 50, label: 'Villages Reached', icon: Target, suffix: '+' },
+              { value: 15, label: 'Active Programs', icon: Sparkles, suffix: '+' },
+              { value: 5, label: 'Years of Impact', icon: Heart, suffix: '+' },
             ].map((stat, index) => (
-              <Card key={index} className="card-hover text-center">
+              <Card key={index} className="card-hover text-center group">
                 <CardContent className="p-6">
-                  <stat.icon className="h-8 w-8 text-primary mx-auto mb-3" />
-                  <div className="text-4xl font-bold text-gradient-primary mb-2">{stat.value}</div>
+                  <stat.icon className="h-8 w-8 text-primary mx-auto mb-3 group-hover:scale-110 transition-smooth" />
+                  <div className="text-4xl font-bold text-gradient-primary mb-2">
+                    <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                  </div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </CardContent>
               </Card>
@@ -132,14 +154,13 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {programs.map((program) => (
               <Card key={program.id} className="card-hover group overflow-hidden">
-                <div className="relative h-48 overflow-hidden bg-linear-to-br from-primary/10 to-secondary/10">
-                  {program.imageUrl && (
-                    <img
-                      src={program.imageUrl}
-                      alt={program.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                    />
-                  )}
+                <div className="relative h-48 overflow-hidden">
+                  <ImageWithFallback
+                    src={program.imageUrl}
+                    alt={program.title}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-smooth"
+                  />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
                 </div>
                 <CardContent className="p-6">

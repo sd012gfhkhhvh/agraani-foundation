@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -18,14 +18,40 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header
+      className={`bg-white sticky top-0 z-40 transition-all duration-300 ${
+        isScrolled ? 'shadow-md py-0' : 'shadow-sm'
+      }`}
+    >
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
-        <div className="flex h-16 items-center justify-between">
+        <div
+          className={`flex items-center justify-between transition-all duration-300 ${
+            isScrolled ? 'h-14' : 'h-16'
+          }`}
+        >
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-primary">
+            <Link
+              href="/"
+              className="text-xl md:text-2xl font-bold text-primary hover:text-primary/90 transition-colors"
+            >
               Agraani Welfare Foundation
             </Link>
           </div>
@@ -36,14 +62,19 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
+                className={`relative text-sm font-medium transition-colors hover:text-primary group ${
                   pathname === item.href ? 'text-primary' : 'text-gray-700'
                 }`}
               >
                 {item.name}
+                <span
+                  className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                    pathname === item.href ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}
+                />
               </Link>
             ))}
-            <Button asChild>
+            <Button asChild className="btn-gradient-primary">
               <Link href="/donate">Donate</Link>
             </Button>
           </div>
@@ -52,39 +83,42 @@ export function Header() {
           <div className="flex md:hidden">
             <button
               type="button"
-              className="text-gray-700"
+              className="text-gray-700 hover:text-primary transition-colors p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              <span className="sr-only">Open menu</span>
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
         {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-1">
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            mobileMenuOpen ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="space-y-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`block px-3 py-2 text-base font-medium rounded-md ${
+                className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
                   pathname === item.href
                     ? 'text-primary bg-primary/10'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
-                onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
             <div className="px-3 pt-2">
-              <Button asChild className="w-full">
+              <Button asChild className="w-full btn-gradient-primary">
                 <Link href="/donate">Donate</Link>
               </Button>
             </div>
           </div>
-        )}
+        </div>
       </nav>
     </header>
   );

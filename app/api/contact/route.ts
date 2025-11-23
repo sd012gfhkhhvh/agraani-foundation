@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -14,6 +15,9 @@ export async function POST(request: NextRequest) {
         message: data.message,
       },
     });
+
+    revalidatePath('/admin/dashboard');
+    revalidatePath('/admin/contact-submissions');
 
     return NextResponse.json(
       { success: true, message: 'Thank you for contacting us! We will get back to you soon.' },

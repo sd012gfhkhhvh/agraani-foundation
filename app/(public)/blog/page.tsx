@@ -1,91 +1,151 @@
+import { ImageWithFallback } from '@/components/public/image-with-fallback';
+import { ServerPagination } from '@/components/public/server-pagination';
 import { Card, CardContent } from '@/components/ui/card';
-import { getPublishedBlogPosts } from '@/lib/data';
-import { generateSEO } from '@/lib/seo';
-import { ArrowRight, Calendar, User } from 'lucide-react';
+import { getBlogPostsPaginated } from '@/lib/data';
+import { ArrowRight, BookOpen, Calendar, Sparkles, User } from 'lucide-react';
 import { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
-
-export const metadata: Metadata = generateSEO({
-  title: 'Blog & News',
-  description:
-    'Latest news, updates, and stories from Agraani Welfare Foundation. Read about our impact and community initiatives.',
-  path: '/blog',
-});
 
 export const revalidate = 3600; // ISR - revalidate every hour
 
-function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('en-IN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(d);
-}
+export const metadata: Metadata = {
+  title: 'Blog - Agraani Welfare Foundation',
+  description:
+    'Read our latest articles about women empowerment, community development, and stories of transformation.',
+};
 
-export default async function BlogPage() {
-  const posts = await getPublishedBlogPosts();
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const currentPage = Number(params.page) || 1;
+
+  // Fetch paginated blog posts
+  const { posts, totalPages } = await getBlogPostsPaginated({
+    page: currentPage,
+    limit: 12,
+  });
 
   return (
-    <div className="py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">News & Updates</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Stay informed about our latest initiatives, success stories, and community impact
-          </p>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative py-20 bg-linear-to-br from-primary to-accent overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/patterns/waves.svg')] opacity-10" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-white">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
+              <Sparkles className="h-4 w-4 text-secondary" />
+              <span className="text-sm font-medium">Stories & Insights</span>
+            </div>
+
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              Our <span className="text-secondary">Blog</span>
+            </h1>
+            <p className="text-xl md:text-2xl max-w-2xl mx-auto opacity-90">
+              Perspectives on empowerment, development, and community transformation
+            </p>
+          </div>
         </div>
+      </section>
 
-        {posts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No posts available yet. Check back soon!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <Card key={post.id} className="hover:shadow-xl transition-shadow overflow-hidden">
-                {post.imageUrl && (
-                  <div className="relative h-48">
-                    <Image src={post.imageUrl} alt={post.title} fill className="object-cover" />
-                  </div>
-                )}
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{post.publishedAt ? formatDate(post.publishedAt) : 'Draft'}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{post.author}</span>
-                    </div>
-                  </div>
-
-                  <h2 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h2>
-
-                  {post.excerpt && (
-                    <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
-                  )}
-
-                  {post.category && (
-                    <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
-                      {post.category}
-                    </span>
-                  )}
-
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="text-primary font-medium inline-flex items-center gap-2 hover:gap-3 transition-all"
+      {/* Blog Posts */}
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {posts.length === 0 ? (
+            <Card className="p-16 text-center">
+              <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold mb-2">No blog posts yet</h3>
+              <p className="text-muted-foreground">
+                Check back soon for inspiring stories and updates
+              </p>
+            </Card>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {posts.map((post) => (
+                  <Card
+                    key={post.id}
+                    className="card-hover group overflow-hidden h-full flex flex-col"
                   >
-                    Read More <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden">
+                      <ImageWithFallback
+                        src={post.imageUrl || ''}
+                        alt={post.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-smooth"
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <CardContent className="p-6 flex-1 flex flex-col">
+                      {/* Category */}
+                      {post.category && (
+                        <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-3 w-fit">
+                          {post.category}
+                        </span>
+                      )}
+
+                      {/* Title */}
+                      <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-smooth line-clamp-2">
+                        {post.title}
+                      </h3>
+
+                      {/* Excerpt */}
+                      <p className="text-muted-foreground mb-4 flex-1 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+
+                      {/* Meta */}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-1">
+                          <User className="h-4 w-4" />
+                          <span>{post.author}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {post.publishedAt
+                              ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })
+                              : 'Draft'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Read More Link */}
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="inline-flex items-center text-primary font-medium hover:gap-2 transition-all"
+                      >
+                        Read More
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Server Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <ServerPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    basePath="/blog"
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ImageWithFallback } from '@/components/public/image-with-fallback';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getActivePrograms } from '@/lib/data';
@@ -57,18 +58,13 @@ export default async function ProgramsPage() {
                   className="card-hover group overflow-hidden h-full flex flex-col"
                 >
                   {/* Image Section */}
-                  <div className="relative h-56 overflow-hidden bg-linear-to-br from-primary/20 to-secondary/20">
-                    {program.imageUrl ? (
-                      <img
-                        src={program.imageUrl}
-                        alt={program.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Book className="h-16 w-16 text-primary/40" />
-                      </div>
-                    )}
+                  <div className="relative h-56 overflow-hidden">
+                    <ImageWithFallback
+                      src={program.imageUrl}
+                      alt={program.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-smooth"
+                    />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
 
                     {/* Number Badge */}
@@ -96,7 +92,6 @@ export default async function ProgramsPage() {
                       >
                         <Heart className="h-4 w-4 mr-2" />
                         Support This Program
-                        <ArrowRight className="h-4 w-4 ml-auto" />
                       </Button>
                     </Link>
                   </CardContent>

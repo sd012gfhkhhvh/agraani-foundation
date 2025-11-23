@@ -21,6 +21,7 @@ import { useCanManageUsers } from '@/lib/hooks/usePermissions';
 import { showPromiseToast } from '@/lib/toast-utils';
 import { UserRole } from '@prisma/client';
 import { AlertTriangle, Clock, Edit2, Shield, User as UserIcon } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -97,7 +98,7 @@ export default function UsersPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {user.image ? (
-                        <img
+                        <Image
                           src={user.image}
                           alt={user.name || 'User'}
                           className="h-9 w-9 rounded-full object-cover"
@@ -214,6 +215,9 @@ export default function UsersPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-blue-400" /> Content approval
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Content deletion
                 </li>
               </ul>
             </div>

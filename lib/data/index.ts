@@ -7,14 +7,20 @@
 export { getAboutContent, getAboutSection } from './about';
 
 // Blog
-export { getAllBlogPosts, getBlogPostBySlug, getPublishedBlogPosts } from './blog';
+export {
+  getAllBlogPosts,
+  getBlogPostBySlug,
+  getBlogPostsPaginated,
+  getPublishedBlogPosts,
+} from './blog';
+export type { PaginatedBlogResult } from './blog';
 
 // Contact
 export { getContactSubmissions, getUnreadSubmissionsCount } from './contact';
 
 // Gallery
-export { getActiveGalleryItems, getAllGalleryItems } from './gallery';
-export type { GalleryFilters } from './gallery';
+export { getActiveGalleryItems, getAllGalleryItems, getGalleryItemsPaginated } from './gallery';
+export type { GalleryFilters, PaginatedGalleryResult } from './gallery';
 
 // Hero Banners
 export { getActiveHeroBanners, getAllHeroBanners } from './hero-banners';

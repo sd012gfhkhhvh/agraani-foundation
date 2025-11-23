@@ -1,3 +1,4 @@
+import { ImageWithFallback } from '@/components/public/image-with-fallback';
 import { Card, CardContent } from '@/components/ui/card';
 import { getActiveTeamMembers } from '@/lib/data';
 import { Heart, Linkedin, Mail, Phone, Users2 } from 'lucide-react';
@@ -54,18 +55,13 @@ export default async function TeamPage() {
               {teamMembers.map((member) => (
                 <Card key={member.id} className="card-hover group overflow-hidden">
                   {/* Profile Image */}
-                  <div className="relative aspect-square overflow-hidden bg-linear-to-br from-primary/10 to-secondary/10">
-                    {member.imageUrl ? (
-                      <img
-                        src={member.imageUrl}
-                        alt={member.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Users2 className="h-24 w-24 text-primary/30" />
-                      </div>
-                    )}
+                  <div className="relative aspect-square overflow-hidden">
+                    <ImageWithFallback
+                      src={member.imageUrl}
+                      alt={member.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-smooth"
+                    />
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
 
                     {/* Social Links Overlay */}
