@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getLegalDocuments } from '@/lib/data';
 import { Calendar, CheckCircle, Clock, Download, FileText } from 'lucide-react';
 import { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'Legal & Compliance - Agraani Welfare Foundation',
@@ -12,9 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LegalPage() {
-  const legalDocs = await prisma.legalDocument.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  const legalDocs = await getLegalDocuments();
 
   return (
     <div className="min-h-screen">

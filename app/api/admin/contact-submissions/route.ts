@@ -1,56 +1,27 @@
-import { requireRole } from '@/lib/auth-utils';
-import { prisma } from '@/lib/prisma';
-import { UserRole } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
+import { getContactSubmissions } from '@/lib/data/contact';
+import { logError } from '@/lib/logger';
+import type { ApiResponse } from '@/types/api';
+import type { ContactSubmission } from '@/types/models';
+import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(): Promise<NextResponse<ApiResponse<ContactSubmission[]>>> {
   try {
-    await requireRole([UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN, UserRole.EDITOR]);
+    // Get all submissions without pagination for admin view
+    const result = await getContactSubmissions(1, 1000);
 
-    const submissions = await prisma.contactSubmission.findMany({
-      orderBy: { createdAt: 'desc' },
+    return NextResponse.json({
+      success: true,
+      data: result.items,
     });
+  } catch (error) {
+    logError(error, { action: 'GET /api/admin/contact-submissions' });
 
-    return NextResponse.json(submissions);
-  } catch (error: any) {
-    console.error('Error fetching contact submissions:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch submissions' },
       {
-        status: error.message?.includes('Unauthorized')
-          ? 401
-          : error.message?.includes('Forbidden')
-            ? 403
-            : 500,
-      }
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    await requireRole([UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN, UserRole.EDITOR]);
-
-    const data = await request.json();
-    const { id, isRead } = data;
-
-    const submission = await prisma.contactSubmission.update({
-      where: { id },
-      data: { isRead },
-    });
-
-    return NextResponse.json(submission);
-  } catch (error: any) {
-    console.error('Error updating submission:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to update submission' },
-      {
-        status: error.message?.includes('Unauthorized')
-          ? 401
-          : error.message?.includes('Forbidden')
-            ? 403
-            : 500,
-      }
+        success: false,
+        error: { message: 'Failed to fetch contact submissions' },
+      },
+      { status: 500 }
     );
   }
 }

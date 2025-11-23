@@ -1,159 +1,139 @@
 'use server';
 
-import { getCurrentUser } from '@/lib/auth-utils';
-import { ForbiddenError, NotFoundError } from '@/lib/errors';
-import { Action, hasPermission, Resource } from '@/lib/permissions';
+import { requirePermission } from '@/lib/auth-utils';
+import { formatApiError, NotFoundError } from '@/lib/errors';
+import { logError } from '@/lib/logger';
+import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
+import {
+  createLegalDocumentSchema,
+  updateLegalDocumentSchema,
+  type CreateLegalDocumentInput,
+  type UpdateLegalDocumentInput,
+} from '@/lib/validations/legal';
+import type { ApiResponse } from '@/types/api';
+import type { LegalDocument } from '@/types/models';
 import { revalidatePath } from 'next/cache';
 
-// Get all legal documents
-export async function getLegalDocuments() {
+/**
+ * Create a new legal document
+ * Server action - mutation only
+ */
+export async function createLegalDocument(
+  input: CreateLegalDocumentInput
+): Promise<ApiResponse<LegalDocument>> {
   try {
-    const user = await getCurrentUser();
-    if (!user || !hasPermission(user.role, Resource.LEGAL_DOCUMENTS, Action.VIEW)) {
-      throw new ForbiddenError('You do not have permission to view legal documents');
-    }
+    // Validate input
+    const validated = createLegalDocumentSchema.parse(input);
 
-    const documents = await prisma.legalDocument.findMany({
-      orderBy: { order: 'asc' },
-    });
+    // Check permission
+    await requirePermission(Resource.LEGAL_DOCUMENTS, Action.CREATE);
 
-    return { success: true, data: documents };
-  } catch (error: any) {
-    console.error('Error fetching legal documents:', error);
-    return {
-      success: false,
-      error: {
-        message: error.message || 'Failed to fetch legal documents',
-        statusCode: error.statusCode || 500,
-      },
-    };
-  }
-}
-
-// Create legal document
-export async function createLegalDocument(data: {
-  name: string;
-  documentType: string;
-  registrationNumber: string;
-  validity: string;
-  issueDate?: string;
-  expiryDate?: string;
-  fileUrl?: string;
-  notes?: string;
-  order?: number;
-}) {
-  try {
-    const user = await getCurrentUser();
-    if (!user || !hasPermission(user.role, Resource.LEGAL_DOCUMENTS, Action.CREATE)) {
-      throw new ForbiddenError('You do not have permission to create legal documents');
-    }
-
+    // Create document
     const document = await prisma.legalDocument.create({
       data: {
-        name: data.name,
-        documentType: data.documentType,
-        registrationNumber: data.registrationNumber,
-        validity: data.validity,
-        issueDate: data.issueDate ? new Date(data.issueDate) : null,
-        expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
-        fileUrl: data.fileUrl,
-        notes: data.notes,
-        order: data.order ?? 0,
+        name: validated.name,
+        documentType: validated.documentType,
+        registrationNumber: validated.registrationNumber,
+        validity: validated.validity,
+        issueDate: validated.issueDate ? new Date(validated.issueDate) : null,
+        expiryDate: validated.expiryDate ? new Date(validated.expiryDate) : null,
+        fileUrl: validated.fileUrl || null,
+        notes: validated.notes || null,
+        order: validated.order || 0,
       },
     });
 
+    // Revalidate pages
     revalidatePath('/admin/legal');
+    revalidatePath('/legal');
 
     return { success: true, data: document };
-  } catch (error: any) {
-    console.error('Error creating legal document:', error);
-    return {
-      success: false,
-      error: {
-        message: error.message || 'Failed to create legal document',
-        statusCode: error.statusCode || 500,
-      },
-    };
+  } catch (error) {
+    logError(error, { action: 'createLegalDocument', input });
+    return { success: false, error: formatApiError(error) };
   }
 }
 
-// Update legal document
+/**
+ * Update an existing legal document
+ * Server action - mutation only
+ */
 export async function updateLegalDocument(
   id: string,
-  data: {
-    name?: string;
-    documentType?: string;
-    registrationNumber?: string;
-    validity?: string;
-    issueDate?: string;
-    expiryDate?: string;
-    fileUrl?: string;
-    notes?: string;
-    order?: number;
-  }
-) {
+  input: UpdateLegalDocumentInput
+): Promise<ApiResponse<LegalDocument>> {
   try {
-    const user = await getCurrentUser();
-    if (!user || !hasPermission(user.role, Resource.LEGAL_DOCUMENTS, Action.UPDATE)) {
-      throw new ForbiddenError('You do not have permission to update legal documents');
-    }
+    // Validate input
+    const validated = updateLegalDocumentSchema.parse(input);
 
+    // Check permission
+    await requirePermission(Resource.LEGAL_DOCUMENTS, Action.UPDATE);
+
+    // Check if document exists
     const document = await prisma.legalDocument.findUnique({ where: { id } });
     if (!document) {
-      throw new NotFoundError('Legal document not found');
+      throw new NotFoundError('Legal document');
     }
+
+    // Update document
+    const updateData: any = {};
+    if (validated.name !== undefined) updateData.name = validated.name;
+    if (validated.documentType !== undefined) updateData.documentType = validated.documentType;
+    if (validated.registrationNumber !== undefined)
+      updateData.registrationNumber = validated.registrationNumber;
+    if (validated.validity !== undefined) updateData.validity = validated.validity;
+    if (validated.issueDate !== undefined) {
+      updateData.issueDate = validated.issueDate ? new Date(validated.issueDate) : null;
+    }
+    if (validated.expiryDate !== undefined) {
+      updateData.expiryDate = validated.expiryDate ? new Date(validated.expiryDate) : null;
+    }
+    if (validated.fileUrl !== undefined) updateData.fileUrl = validated.fileUrl || null;
+    if (validated.notes !== undefined) updateData.notes = validated.notes || null;
+    if (validated.order !== undefined) updateData.order = validated.order;
 
     const updated = await prisma.legalDocument.update({
       where: { id },
-      data: {
-        ...data,
-        issueDate: data.issueDate ? new Date(data.issueDate) : undefined,
-        expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
-      },
+      data: updateData,
     });
 
+    // Revalidate pages
     revalidatePath('/admin/legal');
+    revalidatePath('/legal');
 
     return { success: true, data: updated };
-  } catch (error: any) {
-    console.error('Error updating legal document:', error);
-    return {
-      success: false,
-      error: {
-        message: error.message || 'Failed to update legal document',
-        statusCode: error.statusCode || 500,
-      },
-    };
+  } catch (error) {
+    logError(error, { action: 'updateLegalDocument', id, input });
+    return { success: false, error: formatApiError(error) };
   }
 }
 
-// Delete legal document
-export async function deleteLegalDocument(id: string) {
+/**
+ * Delete a legal document
+ * Server action - mutation only
+ */
+export async function deleteLegalDocument(id: string): Promise<ApiResponse<void>> {
   try {
-    const user = await getCurrentUser();
-    if (!user || !hasPermission(user.role, Resource.LEGAL_DOCUMENTS, Action.DELETE)) {
-      throw new ForbiddenError('You do not have permission to delete legal documents');
-    }
+    // Check permission
+    await requirePermission(Resource.LEGAL_DOCUMENTS, Action.DELETE);
 
+    // Check if document exists
     const document = await prisma.legalDocument.findUnique({ where: { id } });
     if (!document) {
-      throw new NotFoundError('Legal document not found');
+      throw new NotFoundError('Legal document');
     }
 
+    // Delete document
     await prisma.legalDocument.delete({ where: { id } });
 
+    // Revalidate pages
     revalidatePath('/admin/legal');
+    revalidatePath('/legal');
 
-    return { success: true, data: null };
-  } catch (error: any) {
-    console.error('Error deleting legal document:', error);
-    return {
-      success: false,
-      error: {
-        message: error.message || 'Failed to delete legal document',
-        statusCode: error.statusCode || 500,
-      },
-    };
+    return { success: true };
+  } catch (error) {
+    logError(error, { action: 'deleteLegalDocument', id });
+    return { success: false, error: formatApiError(error) };
   }
 }

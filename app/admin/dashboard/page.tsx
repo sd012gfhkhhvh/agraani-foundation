@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { getDashboardStats } from '@/lib/data/dashboard';
 import {
   ArrowRight,
   Briefcase,
@@ -28,31 +28,9 @@ export default async function AdminDashboardPage() {
   }
 
   // Get comprehensive counts for dashboard stats
-  const [
-    programsCount,
-    activeProgramsCount,
-    blogPostsCount,
-    publishedBlogsCount,
-    galleryCount,
-    unreadContactSubmissions,
-    totalContactSubmissions,
-    teamMembersCount,
-    objectivesCount,
-    heroBannersCount,
-  ] = await Promise.all([
-    prisma.program.count(),
-    prisma.program.count({ where: { isActive: true } }),
-    prisma.blogPost.count(),
-    prisma.blogPost.count({ where: { isPublished: true } }),
-    prisma.galleryItem.count(),
-    prisma.contactSubmission.count({ where: { isRead: false } }),
-    prisma.contactSubmission.count(),
-    prisma.teamMember.count(),
-    prisma.objective.count(),
-    prisma.heroBanner.count(),
-  ]);
+  const stats = await getDashboardStats();
 
-  const hasUnreadMessages = unreadContactSubmissions > 0;
+  const hasUnreadMessages = stats.unreadContactSubmissions > 0;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -92,8 +70,8 @@ export default async function AdminDashboardPage() {
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-foreground">
-                  You have {unreadContactSubmissions} unread message
-                  {unreadContactSubmissions !== 1 ? 's' : ''}
+                  You have {stats.unreadContactSubmissions} unread message
+                  {stats.unreadContactSubmissions !== 1 ? 's' : ''}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   New contact submissions are waiting for your review
@@ -123,13 +101,13 @@ export default async function AdminDashboardPage() {
                   <Briefcase className="h-6 w-6 text-primary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-foreground">{programsCount}</div>
+                  <div className="text-3xl font-bold text-foreground">{stats.programsCount}</div>
                   <div className="text-sm text-muted-foreground mt-1 font-medium">Programs</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs font-medium bg-primary/10 w-fit px-2.5 py-1 rounded-full text-primary border border-primary/20">
                 <CheckCircle className="h-3.5 w-3.5" />
-                <span>{activeProgramsCount} active</span>
+                <span>{stats.activeProgramsCount} active</span>
               </div>
             </CardContent>
           </Card>
@@ -147,13 +125,13 @@ export default async function AdminDashboardPage() {
                   <Newspaper className="h-6 w-6 text-secondary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-foreground">{blogPostsCount}</div>
+                  <div className="text-3xl font-bold text-foreground">{stats.blogPostsCount}</div>
                   <div className="text-sm text-muted-foreground mt-1 font-medium">Blog Posts</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs font-medium bg-secondary/10 w-fit px-2.5 py-1 rounded-full text-secondary border border-secondary/20">
                 <TrendingUp className="h-3.5 w-3.5" />
-                <span>{publishedBlogsCount} published</span>
+                <span>{stats.publishedBlogsCount} published</span>
               </div>
             </CardContent>
           </Card>
@@ -171,7 +149,7 @@ export default async function AdminDashboardPage() {
                   <ImageIcon className="h-6 w-6 text-accent" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-foreground">{galleryCount}</div>
+                  <div className="text-3xl font-bold text-foreground">{stats.galleryCount}</div>
                   <div className="text-sm text-muted-foreground mt-1 font-medium">Media Items</div>
                 </div>
               </div>
@@ -202,7 +180,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-foreground">
-                    {totalContactSubmissions}
+                    {stats.totalContactSubmissions}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1 font-medium">Messages</div>
                 </div>
@@ -211,7 +189,7 @@ export default async function AdminDashboardPage() {
                 {hasUnreadMessages ? (
                   <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
                     <Clock className="h-3.5 w-3.5" />
-                    <span>{unreadContactSubmissions} unread</span>
+                    <span>{stats.unreadContactSubmissions} unread</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full border border-green-500/20">
@@ -235,7 +213,7 @@ export default async function AdminDashboardPage() {
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{teamMembersCount}</div>
+                  <div className="text-2xl font-bold text-foreground">{stats.teamMembersCount}</div>
                   <div className="text-sm text-muted-foreground font-medium">Team Members</div>
                 </div>
               </div>
@@ -251,7 +229,7 @@ export default async function AdminDashboardPage() {
                   <Target className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{objectivesCount}</div>
+                  <div className="text-2xl font-bold text-foreground">{stats.objectivesCount}</div>
                   <div className="text-sm text-muted-foreground font-medium">Objectives</div>
                 </div>
               </div>
@@ -267,7 +245,7 @@ export default async function AdminDashboardPage() {
                   <Image className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{heroBannersCount}</div>
+                  <div className="text-2xl font-bold text-foreground">{stats.heroBannersCount}</div>
                   <div className="text-sm text-muted-foreground font-medium">Hero Banners</div>
                 </div>
               </div>

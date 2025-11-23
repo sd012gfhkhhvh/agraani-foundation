@@ -7,27 +7,13 @@ import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingCard } from '@/components/ui/loading';
-import {
-  deleteContactSubmission,
-  getContactSubmissions,
-  markSubmissionAsRead,
-} from '@/lib/actions';
+import { deleteContactSubmission, markSubmissionAsRead } from '@/lib/actions';
+import { useContactSubmissions } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
-import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { showPromiseToast } from '@/lib/toast-utils';
 import { Calendar, Eye, Mail, Phone, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface ContactSubmission {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string | null;
-  subject?: string | null;
-  message: string;
-  isRead: boolean;
-  createdAt: Date | string;
-}
+import { useState } from 'react';
 
 function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat('en-IN', {
@@ -40,8 +26,7 @@ function formatDate(date: Date | string): string {
 }
 
 export default function ContactSubmissionsPage() {
-  const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: submissions = [], isLoading, refetch } = useContactSubmissions();
   const [filter, setFilter] = useState<'all' | 'unread'>('unread');
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -50,30 +35,15 @@ export default function ContactSubmissionsPage() {
 
   const permissions = usePermissions(Resource.CONTACT_SUBMISSIONS);
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
-
-  const fetchSubmissions = async () => {
-    setIsLoading(true);
-    const result = await getContactSubmissions();
-    if (result.success && result.data) {
-      setSubmissions(result.data);
-    } else {
-      showError('Failed to load contact submissions');
-    }
-    setIsLoading(false);
-  };
-
   const handleMarkAsRead = async (id: string) => {
-    const result = await showPromiseToast(markSubmissionAsRead(id, true), {
+    const result = await showPromiseToast(markSubmissionAsRead(id, { isRead: true }), {
       loading: 'Marking as read...',
       success: 'Marked as read!',
       error: 'Failed to mark as read',
     });
 
     if (result.success) {
-      await fetchSubmissions();
+      await refetch();
     }
   };
 
@@ -94,7 +64,7 @@ export default function ContactSubmissionsPage() {
       });
 
       if (result.success) {
-        await fetchSubmissions();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

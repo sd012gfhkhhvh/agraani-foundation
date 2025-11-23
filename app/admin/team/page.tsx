@@ -10,36 +10,18 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createTeamMember,
-  deleteTeamMember,
-  getTeamMembers,
-  updateTeamMember,
-} from '@/lib/actions';
+import { createTeamMember, deleteTeamMember, updateTeamMember } from '@/lib/actions';
+import { useTeamMembers } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { TeamMember } from '@/types/models';
 import { Edit, Plus, Trash2, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  position: string;
-  bio?: string | null;
-  imageUrl?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  linkedIn?: string | null;
-  order: number;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function TeamMembersPage() {
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: members = [], isLoading, refetch } = useTeamMembers();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<Partial<TeamMember>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -49,21 +31,6 @@ export default function TeamMembersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.TEAM_MEMBERS);
-
-  useEffect(() => {
-    fetchMembers();
-  }, []);
-
-  const fetchMembers = async () => {
-    setIsLoading(true);
-    const result = await getTeamMembers();
-    if (result.success && result.data) {
-      setMembers(result.data);
-    } else {
-      showError('Failed to load team members');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (member?: TeamMember) => {
     if (member) {
@@ -113,7 +80,7 @@ export default function TeamMembersPage() {
       });
 
       if (result.success) {
-        await fetchMembers();
+        await refetch();
         setIsDialogOpen(false);
         setCurrentMember({});
       }
@@ -139,7 +106,7 @@ export default function TeamMembersPage() {
       });
 
       if (result.success) {
-        await fetchMembers();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

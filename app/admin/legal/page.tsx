@@ -9,36 +9,19 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
-import {
-  createLegalDocument,
-  deleteLegalDocument,
-  getLegalDocuments,
-  updateLegalDocument,
-} from '@/lib/actions';
+import { createLegalDocument, deleteLegalDocument, updateLegalDocument } from '@/lib/actions';
+import { useLegalDocuments } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { LegalDocument } from '@/types/models';
 import { Edit, Eye, FileText, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface LegalDocument {
-  id: string;
-  name: string;
-  documentType: string;
-  registrationNumber: string;
-  validity: string;
-  issueDate: Date | string | null;
-  expiryDate: Date | string | null;
-  fileUrl?: string | null;
-  notes?: string | null;
-  order: number;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function LegalDocumentsPage() {
-  const [documents, setDocuments] = useState<LegalDocument[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Use TanStack Query for data fetching
+  const { data: documents = [], isLoading, refetch } = useLegalDocuments();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentDoc, setCurrentDoc] = useState<Partial<LegalDocument>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -49,21 +32,6 @@ export default function LegalDocumentsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.LEGAL_DOCUMENTS);
-
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const fetchDocuments = async () => {
-    setIsLoading(true);
-    const result = await getLegalDocuments();
-    if (result.success && result.data) {
-      setDocuments(result.data);
-    } else {
-      showError('Failed to load legal documents');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (doc?: LegalDocument) => {
     if (doc) {
@@ -126,7 +94,7 @@ export default function LegalDocumentsPage() {
       });
 
       if (result.success) {
-        await fetchDocuments();
+        await refetch(); // Refetch data after mutation
         setIsDialogOpen(false);
         setCurrentDoc({});
       }
@@ -152,7 +120,7 @@ export default function LegalDocumentsPage() {
       });
 
       if (result.success) {
-        await fetchDocuments();
+        await refetch(); // Refetch data after mutation
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }
@@ -319,7 +287,7 @@ export default function LegalDocumentsPage() {
                   ? new Date(currentDoc.issueDate).toISOString().split('T')[0]
                   : ''
               }
-              onChange={(e) => setCurrentDoc({ ...currentDoc, issueDate: e.target.value })}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, issueDate: e.target.value as any })}
             />
           </div>
 
@@ -332,7 +300,7 @@ export default function LegalDocumentsPage() {
                   ? new Date(currentDoc.expiryDate).toISOString().split('T')[0]
                   : ''
               }
-              onChange={(e) => setCurrentDoc({ ...currentDoc, expiryDate: e.target.value })}
+              onChange={(e) => setCurrentDoc({ ...currentDoc, expiryDate: e.target.value as any })}
             />
           </div>
 

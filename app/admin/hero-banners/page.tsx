@@ -10,35 +10,18 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createHeroBanner,
-  deleteHeroBanner,
-  getHeroBanners,
-  updateHeroBanner,
-} from '@/lib/actions';
+import { createHeroBanner, deleteHeroBanner, updateHeroBanner } from '@/lib/actions';
+import { useHeroBanners } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { HeroBanner } from '@/types/models';
 import { Edit, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface HeroBanner {
-  id: string;
-  title: string;
-  subtitle?: string | null;
-  description?: string | null;
-  imageUrl: string;
-  ctaText?: string | null;
-  ctaLink?: string | null;
-  order: number;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function HeroBannersPage() {
-  const [banners, setBanners] = useState<HeroBanner[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: banners = [], isLoading, refetch } = useHeroBanners();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentBanner, setCurrentBanner] = useState<Partial<HeroBanner>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -48,21 +31,6 @@ export default function HeroBannersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.HERO_BANNERS);
-
-  useEffect(() => {
-    fetchBanners();
-  }, []);
-
-  const fetchBanners = async () => {
-    setIsLoading(true);
-    const result = await getHeroBanners();
-    if (result.success && result.data) {
-      setBanners(result.data);
-    } else {
-      showError('Failed to load hero banners');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (banner?: HeroBanner) => {
     if (banner) {
@@ -110,7 +78,7 @@ export default function HeroBannersPage() {
       });
 
       if (result.success) {
-        await fetchBanners();
+        await refetch();
         setIsDialogOpen(false);
         setCurrentBanner({});
       }
@@ -136,7 +104,7 @@ export default function HeroBannersPage() {
       });
 
       if (result.success) {
-        await fetchBanners();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

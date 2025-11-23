@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getPublishedBlogPosts } from '@/lib/data/blog';
 import { ArrowRight, Calendar, Newspaper, User } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -15,14 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsPage() {
-  const blogPosts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: 'desc' },
-    take: 12,
-  });
+  const blogPosts = await getPublishedBlogPosts();
 
   const featuredPost = blogPosts[0];
-  const otherPosts = blogPosts.slice(1);
+  const otherPosts = blogPosts.slice(1, 13); // Take up to 12 more posts
 
   return (
     <div className="min-h-screen">

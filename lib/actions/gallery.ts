@@ -1,46 +1,29 @@
 'use server';
 
 import { requirePermission } from '@/lib/auth-utils';
-import { formatApiError, logError } from '@/lib/errors';
+import { formatApiError, NotFoundError } from '@/lib/errors';
+import { logError } from '@/lib/logger';
 import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
-import { MediaType } from '@prisma/client';
+import {
+  createGalleryItemSchema,
+  updateGalleryItemSchema,
+  type CreateGalleryItemInput,
+  type UpdateGalleryItemInput,
+} from '@/lib/validations/gallery';
+import type { ApiResponse } from '@/types/api';
+import type { GalleryItem } from '@/types/models';
 import { revalidatePath } from 'next/cache';
 
-/**
- * Get all gallery items
- */
-export async function getGalleryItems() {
+export async function createGalleryItem(
+  input: CreateGalleryItemInput
+): Promise<ApiResponse<GalleryItem>> {
   try {
-    const items = await prisma.galleryItem.findMany({
-      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
-    });
-
-    return { success: true, data: items };
-  } catch (error) {
-    logError(error, { action: 'getGalleryItems' });
-    return { success: false, error: formatApiError(error) };
-  }
-}
-
-/**
- * Create a gallery item (requires EDITOR, CONTENT_ADMIN, or SUPER_ADMIN)
- */
-export async function createGalleryItem(data: {
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  type: MediaType;
-  category?: string;
-  order?: number;
-  isActive?: boolean;
-}) {
-  try {
+    const validated = createGalleryItemSchema.parse(input);
     await requirePermission(Resource.GALLERY, Action.CREATE);
 
     const item = await prisma.galleryItem.create({
-      data,
+      data: validated,
     });
 
     revalidatePath('/admin/gallery');
@@ -48,33 +31,25 @@ export async function createGalleryItem(data: {
 
     return { success: true, data: item };
   } catch (error) {
-    logError(error, { action: 'createGalleryItem', data });
+    logError(error, { action: 'createGalleryItem', input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
-/**
- * Update a gallery item (requires EDITOR, CONTENT_ADMIN, or SUPER_ADMIN)
- */
 export async function updateGalleryItem(
   id: string,
-  data: Partial<{
-    title: string;
-    description: string;
-    imageUrl: string;
-    videoUrl: string;
-    type: MediaType;
-    category: string;
-    order: number;
-    isActive: boolean;
-  }>
-) {
+  input: UpdateGalleryItemInput
+): Promise<ApiResponse<GalleryItem>> {
   try {
+    const validated = updateGalleryItemSchema.parse(input);
     await requirePermission(Resource.GALLERY, Action.UPDATE);
+
+    const existing = await prisma.galleryItem.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError('Gallery item');
 
     const item = await prisma.galleryItem.update({
       where: { id },
-      data,
+      data: validated,
     });
 
     revalidatePath('/admin/gallery');
@@ -82,26 +57,26 @@ export async function updateGalleryItem(
 
     return { success: true, data: item };
   } catch (error) {
-    logError(error, { action: 'updateGalleryItem', id, data });
+    logError(error, { action: 'updateGalleryItem', id, input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
-/**
- * Delete a gallery item (requires CONTENT_ADMIN or SUPER_ADMIN)
- */
-export async function deleteGalleryItem(id: string) {
+export async function deleteGalleryItem(id: string): Promise<ApiResponse<void>> {
   try {
     await requirePermission(Resource.GALLERY, Action.DELETE);
 
-    const item = await prisma.galleryItem.delete({
+    const item = await prisma.galleryItem.findUnique({ where: { id } });
+    if (!item) throw new NotFoundError('Gallery item');
+
+    await prisma.galleryItem.delete({
       where: { id },
     });
 
     revalidatePath('/admin/gallery');
     revalidatePath('/gallery');
 
-    return { success: true, data: item };
+    return { success: true };
   } catch (error) {
     logError(error, { action: 'deleteGalleryItem', id });
     return { success: false, error: formatApiError(error) };

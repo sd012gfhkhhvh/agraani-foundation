@@ -10,29 +10,18 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import { createProgram, deleteProgram, getPrograms, updateProgram } from '@/lib/actions';
+import { createProgram, deleteProgram, updateProgram } from '@/lib/actions';
+import { usePrograms } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { Program } from '@/types/models';
 import { Edit, Plus, Target, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface Program {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  imageUrl: string | null;
-  icon?: string | null;
-  order: number;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function ProgramsPage() {
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: programs = [], isLoading, refetch } = usePrograms();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentProgram, setCurrentProgram] = useState<Partial<Program>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -42,21 +31,6 @@ export default function ProgramsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.PROGRAMS);
-
-  useEffect(() => {
-    fetchPrograms();
-  }, []);
-
-  const fetchPrograms = async () => {
-    setIsLoading(true);
-    const result = await getPrograms();
-    if (result.success && result.data) {
-      setPrograms(result.data);
-    } else {
-      showError('Failed to load programs');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (program?: Program) => {
     if (program) {
@@ -102,7 +76,7 @@ export default function ProgramsPage() {
       });
 
       if (result.success) {
-        await fetchPrograms();
+        await refetch();
         setIsDialogOpen(false);
         setCurrentProgram({});
       }
@@ -128,7 +102,7 @@ export default function ProgramsPage() {
       });
 
       if (result.success) {
-        await fetchPrograms();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

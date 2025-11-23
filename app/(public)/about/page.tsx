@@ -1,9 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getAboutContent, getActiveObjectives } from '@/lib/data';
 import { Heart, Lightbulb, Target, Users2 } from 'lucide-react';
 import { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'About Us - Agraani Welfare Foundation',
@@ -12,13 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [aboutContent, objectives] = await Promise.all([
-    prisma.aboutContent.findMany(),
-    prisma.objective.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
-    }),
-  ]);
+  const [aboutContent, objectives] = await Promise.all([getAboutContent(), getActiveObjectives()]);
 
   const mission = aboutContent.find((c) => c.section === 'mission');
   const vision = aboutContent.find((c) => c.section === 'vision');

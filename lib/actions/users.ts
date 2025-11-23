@@ -1,20 +1,33 @@
 'use server';
 
 import { requirePermission } from '@/lib/auth-utils';
-import { formatApiError, logError } from '@/lib/errors';
+import { formatApiError, NotFoundError } from '@/lib/errors';
+import { logError } from '@/lib/logger';
 import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
-import { UserRole } from '@prisma/client';
+import { updateUserRoleSchema, type UpdateUserRoleInput } from '@/lib/validations/users';
+import type { ApiResponse } from '@/types/api';
+import type { User } from '@/types/models';
 import { revalidatePath } from 'next/cache';
 
 /**
- * Get all users (SUPER_ADMIN only)
+ * Update user role (SUPER_ADMIN only)
+ * Server action - mutation only
  */
-export async function getUsers() {
+export async function updateUserRole(
+  userId: string,
+  input: UpdateUserRoleInput
+): Promise<ApiResponse<User>> {
   try {
-    await requirePermission(Resource.USERS, Action.VIEW);
+    const validated = updateUserRoleSchema.parse(input);
+    await requirePermission(Resource.USERS, Action.MANAGE_ROLES);
 
-    const users = await prisma.user.findMany({
+    const existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) throw new NotFoundError('User');
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { role: validated.role },
       select: {
         id: true,
         name: true,
@@ -24,40 +37,13 @@ export async function getUsers() {
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return { success: true, data: users };
-  } catch (error) {
-    logError(error, { action: 'getUsers' });
-    return { success: false, error: formatApiError(error) };
-  }
-}
-
-/**
- * Update user role (SUPER_ADMIN only)
- */
-export async function updateUserRole(userId: string, role: UserRole) {
-  try {
-    await requirePermission(Resource.USERS, Action.MANAGE_ROLES);
-
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { role },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        image: true,
-      },
     });
 
     revalidatePath('/admin/users');
 
     return { success: true, data: user };
   } catch (error) {
-    logError(error, { action: 'updateUserRole', userId, role });
+    logError(error, { action: 'updateUserRole', userId, input });
     return { success: false, error: formatApiError(error) };
   }
 }

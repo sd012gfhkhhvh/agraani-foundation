@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getPublishedBlogPosts } from '@/lib/data';
 import { generateSEO } from '@/lib/seo';
 import { ArrowRight, Calendar, User } from 'lucide-react';
 import { Metadata } from 'next';
@@ -13,7 +13,7 @@ export const metadata: Metadata = generateSEO({
   path: '/blog',
 });
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
@@ -25,10 +25,7 @@ function formatDate(date: Date | string): string {
 }
 
 export default async function BlogPage() {
-  const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: 'desc' },
-  });
+  const posts = await getPublishedBlogPosts();
 
   return (
     <div className="py-16">

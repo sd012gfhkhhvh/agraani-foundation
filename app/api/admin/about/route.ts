@@ -1,42 +1,30 @@
-import { requireRole } from '@/lib/auth-utils';
-import { prisma } from '@/lib/prisma';
-import { UserRole } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
+import { getAboutContent } from '@/lib/data';
+import { logError } from '@/lib/logger';
+import type { ApiResponse } from '@/types/api';
+import type { AboutSection } from '@/types/models';
+import { NextResponse } from 'next/server';
 
-export async function GET() {
+/**
+ * GET /api/admin/about
+ * Fetch all about content sections for admin
+ */
+export async function GET(): Promise<NextResponse<ApiResponse<AboutSection[]>>> {
   try {
-    const sections = await prisma.aboutContent.findMany();
-    return NextResponse.json(sections);
-  } catch (error) {
-    console.error('Error fetching about content:', error);
-    return NextResponse.json({ error: 'Failed to fetch about content' }, { status: 500 });
-  }
-}
+    const sections = await getAboutContent();
 
-export async function PUT(request: NextRequest) {
-  try {
-    await requireRole([UserRole.SUPER_ADMIN, UserRole.CONTENT_ADMIN, UserRole.EDITOR]);
-
-    const data = await request.json();
-    const { id, ...updateData } = data;
-
-    const section = await prisma.aboutContent.update({
-      where: { id },
-      data: updateData,
+    return NextResponse.json({
+      success: true,
+      data: sections,
     });
+  } catch (error) {
+    logError(error, { action: 'GET /api/admin/about' });
 
-    return NextResponse.json(section);
-  } catch (error: any) {
-    console.error('Error updating about content:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update about content' },
       {
-        status: error.message?.includes('Unauthorized')
-          ? 401
-          : error.message?.includes('Forbidden')
-            ? 403
-            : 500,
-      }
+        success: false,
+        error: { message: 'Failed to fetch about content' },
+      },
+      { status: 500 }
     );
   }
 }

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { prisma } from '@/lib/prisma';
+import { getBlogPostBySlug } from '@/lib/data';
 import { generateSEO } from '@/lib/seo';
 import { Calendar, Tag, User } from 'lucide-react';
 import { Metadata } from 'next';
@@ -7,8 +7,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+export const revalidate = 3600; // ISR - revalidate every hour
+
 interface BlogPostPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function formatDate(date: Date | string): string {
@@ -20,10 +22,9 @@ function formatDate(date: Date | string): string {
   }).format(d);
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: params.slug, isPublished: true },
-  });
+export async function generateMetadata(props: BlogPostPageProps): Promise<Metadata> {
+  const params = await props.params;
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
     return { title: 'Post Not Found' };
@@ -37,10 +38,9 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   });
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: params.slug, isPublished: true },
-  });
+export default async function BlogPostPage(props: BlogPostPageProps) {
+  const params = await props.params;
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
     notFound();

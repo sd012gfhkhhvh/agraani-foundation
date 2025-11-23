@@ -1,6 +1,5 @@
 'use client';
 
-import { RichTextEditor } from '@/components/RichTextEditor';
 import { AdminCard } from '@/components/admin/AdminCard';
 import { AdminDialog } from '@/components/admin/AdminDialog';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
@@ -12,32 +11,33 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import { createBlogPost, deleteBlogPost, getBlogPosts, updateBlogPost } from '@/lib/actions';
+import { createBlogPost, deleteBlogPost, updateBlogPost } from '@/lib/actions';
+import { useBlogPosts } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { BlogPost } from '@/types/models';
 import { Calendar, Edit, FileText, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt?: string | null;
-  content: string;
-  imageUrl?: string | null;
-  author: string;
-  category?: string | null;
-  tags: string[];
-  isPublished: boolean;
-  publishedAt?: Date | string | null;
-  createdAt: Date | string;
-  updatedAt?: Date | string;
-}
+// Lazy-load RichTextEditor for better performance
+const RichTextEditor = dynamic(
+  () => import('@/components/RichTextEditor').then((mod) => ({ default: mod.RichTextEditor })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center text-muted-foreground">
+        Loading editor...
+      </div>
+    ),
+  }
+);
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Use TanStack Query for data fetching
+  const { data: posts = [], isLoading, refetch } = useBlogPosts();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<Partial<BlogPost>>({
     tags: [],
@@ -51,21 +51,6 @@ export default function BlogPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.BLOG_POSTS);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    setIsLoading(true);
-    const result = await getBlogPosts(true);
-    if (result.success && result.data) {
-      setPosts(result.data);
-    } else {
-      showError('Failed to load blog posts');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (post?: BlogPost) => {
     if (post) {
@@ -105,7 +90,7 @@ export default function BlogPage() {
       });
 
       if (result.success) {
-        await fetchPosts();
+        await refetch(); // Refetch data after mutation
         setIsDialogOpen(false);
         setCurrentPost({ tags: [], isPublished: false });
       }
@@ -133,7 +118,7 @@ export default function BlogPage() {
       });
 
       if (result.success) {
-        await fetchPosts();
+        await refetch(); // Refetch data after mutation
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getActiveGalleryItems } from '@/lib/data';
 import { Filter, Image as ImageIcon, Video } from 'lucide-react';
 import { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'Gallery - Agraani Welfare Foundation',
@@ -13,10 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GalleryPage() {
-  const galleryItems = await prisma.galleryItem.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-  });
+  const galleryItems = await getActiveGalleryItems();
 
   // Get unique categories
   const categories = [...new Set(galleryItems.map((item) => item.category).filter(Boolean))];

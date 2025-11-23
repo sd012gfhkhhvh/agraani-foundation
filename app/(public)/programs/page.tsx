@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getActivePrograms } from '@/lib/data';
 import { ArrowRight, Book, Heart, Sparkles, Users } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'Our Programs - Agraani Welfare Foundation',
@@ -14,10 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProgramsPage() {
-  const programs = await prisma.program.findMany({
-    where: { isActive: true },
-    orderBy: { order: 'asc' },
-  });
+  const programs = await getActivePrograms();
 
   return (
     <div className="min-h-screen">

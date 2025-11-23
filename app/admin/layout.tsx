@@ -1,9 +1,8 @@
 import { AdminLayoutShell } from '@/components/admin/AdminLayoutShell';
-import { ThemeProvider } from '@/components/theme-provider';
+import { AdminProviders } from '@/components/admin/AdminProviders';
 import { auth } from '@/lib/auth';
 import { SessionProvider } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import NextTopLoader from 'nextjs-toploader';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -17,12 +16,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <SessionProvider session={session}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <NextTopLoader color="var(--color-primary)" showSpinner={false} />
+      <AdminProviders>
         <AdminLayoutShell user={session.user} userRole={userRole} isSuperAdmin={isSuperAdmin}>
           {children}
         </AdminLayoutShell>
-      </ThemeProvider>
+      </AdminProviders>
     </SessionProvider>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { AdminCard } from '@/components/admin/AdminCard';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { RoleBadge } from '@/components/admin/RoleBadge';
 import { Badge } from '@/components/ui/badge';
@@ -8,36 +7,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingCard } from '@/components/ui/loading';
-import { getUsers, updateUserRole } from '@/lib/actions';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { updateUserRole } from '@/lib/actions';
+import { useUsers } from '@/lib/hooks/useAdminData';
 import { useCanManageUsers } from '@/lib/hooks/usePermissions';
-import { showError, showPromiseToast } from '@/lib/toast-utils';
+import { showPromiseToast } from '@/lib/toast-utils';
 import { UserRole } from '@prisma/client';
-import { AlertTriangle, Clock, Edit2, Shield, User } from 'lucide-react';
+import { AlertTriangle, Clock, Edit2, Shield, User as UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-interface AdminUser {
-  id: string;
-  name: string | null;
-  email: string | null;
-  role: UserRole | null;
-  image?: string | null;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
-
 export default function UsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: users = [], isLoading, refetch } = useUsers();
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.VIEWER);
 
   const { canManageUsers, isLoading: permCheck } = useCanManageUsers();
   const router = useRouter();
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   // Redirect if user cannot manage users
   useEffect(() => {
@@ -46,23 +39,8 @@ export default function UsersPage() {
     }
   }, [canManageUsers, permCheck, isLoading, router]);
 
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    const result = await getUsers();
-    if (result.success && result.data) {
-      setUsers(result.data);
-    } else {
-      if (result.error?.statusCode === 403) {
-        router.push('/admin/unauthorized');
-      } else {
-        showError('Failed to load users');
-      }
-    }
-    setIsLoading(false);
-  };
-
   const handleUpdateRole = async (userId: string, newRole: UserRole) => {
-    const promise = updateUserRole(userId, newRole);
+    const promise = updateUserRole(userId, { role: newRole });
     const result = await showPromiseToast(promise, {
       loading: 'Updating user role...',
       success: 'User role updated successfully!',
@@ -70,7 +48,7 @@ export default function UsersPage() {
     });
 
     if (result.success) {
-      await fetchUsers();
+      await refetch();
       setEditingUser(null);
     }
   };
@@ -98,72 +76,105 @@ export default function UsersPage() {
 
       {users.length === 0 ? (
         <EmptyState
-          icon={User}
+          icon={UserIcon}
           title="No users found"
           description="No users have been created yet."
         />
       ) : (
-        <div className="grid gap-4">
-          {users.map((user) => (
-            <AdminCard
-              key={user.id}
-              title={user.name || 'Unnamed User'}
-              subtitle={user.email || 'No email'}
-              image={user.image}
-              actions={
-                editingUser === user.id ? (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleUpdateRole(user.id, selectedRole)}
-                      className="btn-gradient-primary"
-                    >
-                      Save
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingUser(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEditingUser(user.id);
-                      setSelectedRole(user.role || UserRole.VIEWER);
-                    }}
-                  >
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    Change Role
-                  </Button>
-                )
-              }
-            >
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Current Role:</span>
-                  {editingUser === user.id ? (
-                    <select
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                      className="text-sm border rounded px-2 py-1 bg-background focus:ring-2 focus:ring-primary focus:outline-none"
-                    >
-                      <option value={UserRole.SUPER_ADMIN}>Super Admin</option>
-                      <option value={UserRole.CONTENT_ADMIN}>Content Admin</option>
-                      <option value={UserRole.EDITOR}>Editor</option>
-                      <option value={UserRole.VIEWER}>Viewer</option>
-                    </select>
-                  ) : (
-                    user.role && <RoleBadge role={user.role} />
-                  )}
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </AdminCard>
-          ))}
+        <div className="rounded-md border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      {user.image ? (
+                        <img
+                          src={user.image}
+                          alt={user.name || 'User'}
+                          className="h-9 w-9 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                          <UserIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{user.name || 'Unnamed User'}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {user.email || 'No email'}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {editingUser === user.id ? (
+                      <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                        className="text-sm border rounded px-2 py-1 bg-background focus:ring-2 focus:ring-primary focus:outline-none w-full max-w-[140px]"
+                      >
+                        <option value={UserRole.SUPER_ADMIN}>Super Admin</option>
+                        <option value={UserRole.CONTENT_ADMIN}>Content Admin</option>
+                        <option value={UserRole.EDITOR}>Editor</option>
+                        <option value={UserRole.VIEWER}>Viewer</option>
+                      </select>
+                    ) : (
+                      user.role && <RoleBadge role={user.role} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {editingUser === user.id ? (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateRole(user.id, selectedRole)}
+                          className="btn-gradient-primary h-8 px-3"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingUser(null)}
+                          className="h-8 px-3"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingUser(user.id);
+                          setSelectedRole(user.role || UserRole.VIEWER);
+                        }}
+                        className="h-8"
+                      >
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -199,13 +210,10 @@ export default function UsersPage() {
               </Badge>
               <ul className="space-y-1.5 text-muted-foreground text-xs">
                 <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Manage all content
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Content creation and editing
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Create, edit & delete
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Publish content
+                  <span className="w-1 h-1 rounded-full bg-blue-400" /> Content approval
                 </li>
               </ul>
             </div>
@@ -216,13 +224,11 @@ export default function UsersPage() {
               </Badge>
               <ul className="space-y-1.5 text-muted-foreground text-xs">
                 <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-green-400" /> Create & edit content
+                  <span className="w-1 h-1 rounded-full bg-green-400" /> Content creation and
+                  editing
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-green-400" /> Publish content
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-green-400" /> Cannot delete
+                  <span className="w-1 h-1 rounded-full bg-green-400" /> Content approval
                 </li>
               </ul>
             </div>
@@ -233,13 +239,7 @@ export default function UsersPage() {
               </Badge>
               <ul className="space-y-1.5 text-muted-foreground text-xs">
                 <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-gray-400" /> View dashboard
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-gray-400" /> View content
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-gray-400" /> No edit/delete rights
+                  <span className="w-1 h-1 rounded-full bg-gray-400" /> Content viewing
                 </li>
               </ul>
             </div>

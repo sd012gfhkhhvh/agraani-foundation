@@ -10,26 +10,18 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import { createObjective, deleteObjective, getObjectives, updateObjective } from '@/lib/actions';
+import { createObjective, deleteObjective, updateObjective } from '@/lib/actions';
+import { useObjectives } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { Objective } from '@/types/models';
 import { Crosshair, Edit, Plus, Target, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface Objective {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function ObjectivesPage() {
-  const [objectives, setObjectives] = useState<Objective[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: objectives = [], isLoading, refetch } = useObjectives();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentObjective, setCurrentObjective] = useState<Partial<Objective>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -39,21 +31,6 @@ export default function ObjectivesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.OBJECTIVES);
-
-  useEffect(() => {
-    fetchObjectives();
-  }, []);
-
-  const fetchObjectives = async () => {
-    setIsLoading(true);
-    const result = await getObjectives();
-    if (result.success && result.data) {
-      setObjectives(result.data);
-    } else {
-      showError('Failed to load objectives');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (objective?: Objective) => {
     if (objective) {
@@ -93,7 +70,7 @@ export default function ObjectivesPage() {
       });
 
       if (result.success) {
-        await fetchObjectives();
+        await refetch();
         setIsDialogOpen(false);
         setCurrentObjective({});
       }
@@ -119,7 +96,7 @@ export default function ObjectivesPage() {
       });
 
       if (result.success) {
-        await fetchObjectives();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

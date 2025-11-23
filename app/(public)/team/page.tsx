@@ -1,9 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getActiveTeamMembers } from '@/lib/data';
 import { Heart, Linkedin, Mail, Phone, Users2 } from 'lucide-react';
 import { Metadata } from 'next';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ISR - revalidate every hour
 
 export const metadata: Metadata = {
   title: 'Our Team - Agraani Welfare Foundation',
@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TeamPage() {
-  const teamMembers = await prisma.teamMember.findMany({
-    where: { isActive: true },
-    orderBy: { order: 'asc' },
-  });
+  const teamMembers = await getActiveTeamMembers();
 
   return (
     <div className="min-h-screen">

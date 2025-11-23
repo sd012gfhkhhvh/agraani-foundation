@@ -1,69 +1,82 @@
 'use server';
 
 import { requirePermission } from '@/lib/auth-utils';
-import { formatApiError, logError } from '@/lib/errors';
+import { formatApiError, NotFoundError } from '@/lib/errors';
+import { logError } from '@/lib/logger';
 import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
+import {
+  createObjectiveSchema,
+  updateObjectiveSchema,
+  type CreateObjectiveInput,
+  type UpdateObjectiveInput,
+} from '@/lib/validations/objectives';
+import type { ApiResponse } from '@/types/api';
+import type { Objective } from '@/types/models';
 import { revalidatePath } from 'next/cache';
 
-export async function getObjectives() {
+export async function createObjective(
+  input: CreateObjectiveInput
+): Promise<ApiResponse<Objective>> {
   try {
-    const objectives = await prisma.objective.findMany({
-      orderBy: { order: 'asc' },
-    });
-    return { success: true, data: objectives };
-  } catch (error) {
-    logError(error, { action: 'getObjectives' });
-    return { success: false, error: formatApiError(error) };
-  }
-}
-
-export async function createObjective(data: {
-  title: string;
-  description: string;
-  order?: number;
-  isActive?: boolean;
-}) {
-  try {
+    const validated = createObjectiveSchema.parse(input);
     await requirePermission(Resource.OBJECTIVES, Action.CREATE);
-    const objective = await prisma.objective.create({ data });
+
+    const objective = await prisma.objective.create({
+      data: validated,
+    });
+
     revalidatePath('/admin/objectives');
     revalidatePath('/');
+
     return { success: true, data: objective };
   } catch (error) {
-    logError(error, { action: 'createObjective', data });
+    logError(error, { action: 'createObjective', input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
 export async function updateObjective(
   id: string,
-  data: Partial<{
-    title: string;
-    description: string;
-    order: number;
-    isActive: boolean;
-  }>
-) {
+  input: UpdateObjectiveInput
+): Promise<ApiResponse<Objective>> {
   try {
+    const validated = updateObjectiveSchema.parse(input);
     await requirePermission(Resource.OBJECTIVES, Action.UPDATE);
-    const objective = await prisma.objective.update({ where: { id }, data });
+
+    const existing = await prisma.objective.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError('Objective');
+
+    const objective = await prisma.objective.update({
+      where: { id },
+      data: validated,
+    });
+
     revalidatePath('/admin/objectives');
     revalidatePath('/');
+
     return { success: true, data: objective };
   } catch (error) {
-    logError(error, { action: 'updateObjective', id, data });
+    logError(error, { action: 'updateObjective', id, input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
-export async function deleteObjective(id: string) {
+export async function deleteObjective(id: string): Promise<ApiResponse<void>> {
   try {
     await requirePermission(Resource.OBJECTIVES, Action.DELETE);
-    const objective = await prisma.objective.delete({ where: { id } });
+
+    const objective = await prisma.objective.findUnique({ where: { id } });
+    if (!objective) throw new NotFoundError('Objective');
+
+    await prisma.objective.delete({
+      where: { id },
+    });
+
     revalidatePath('/admin/objectives');
     revalidatePath('/');
-    return { success: true, data: objective };
+
+    return { success: true };
   } catch (error) {
     logError(error, { action: 'deleteObjective', id });
     return { success: false, error: formatApiError(error) };

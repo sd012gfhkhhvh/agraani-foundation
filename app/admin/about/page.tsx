@@ -10,17 +10,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createAboutContent,
-  deleteAboutContent,
-  getAboutContent,
-  updateAboutContent,
-} from '@/lib/actions';
+import { createAboutContent, deleteAboutContent, updateAboutContent } from '@/lib/actions';
+import { useAboutContent } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
 import { Edit, FileText, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface AboutSection {
   id: string;
@@ -33,8 +29,9 @@ interface AboutSection {
 }
 
 export default function AboutContentPage() {
-  const [sections, setSections] = useState<AboutSection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Use TanStack Query for data fetching
+  const { data: sections = [], isLoading, refetch } = useAboutContent();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<Partial<AboutSection>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -44,21 +41,6 @@ export default function AboutContentPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.ABOUT_CONTENT);
-
-  useEffect(() => {
-    fetchSections();
-  }, []);
-
-  const fetchSections = async () => {
-    setIsLoading(true);
-    const result = await getAboutContent();
-    if (result.success && result.data) {
-      setSections(result.data);
-    } else {
-      showError('Failed to load about content');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (section?: AboutSection) => {
     if (section) {
@@ -97,7 +79,7 @@ export default function AboutContentPage() {
       });
 
       if (result.success) {
-        await fetchSections();
+        await refetch(); // Refetch data after mutation
         setIsDialogOpen(false);
         setCurrentSection({});
       }
@@ -123,7 +105,7 @@ export default function AboutContentPage() {
       });
 
       if (result.success) {
-        await fetchSections();
+        await refetch(); // Refetch data after mutation
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }

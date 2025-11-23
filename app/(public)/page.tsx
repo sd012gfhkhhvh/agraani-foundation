@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { prisma } from '@/lib/prisma';
+import { getActiveHeroBanners, getActiveObjectives, getActivePrograms } from '@/lib/data';
 import { ArrowRight, Heart, Sparkles, Target, Users } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -15,21 +15,9 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const [heroBanners, programs, objectives] = await Promise.all([
-    prisma.heroBanner.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
-      take: 1,
-    }),
-    prisma.program.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
-      take: 6,
-    }),
-    prisma.objective.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
-      take: 4,
-    }),
+    getActiveHeroBanners(1),
+    getActivePrograms(6),
+    getActiveObjectives(4),
   ]);
 
   const hero = heroBanners[0];

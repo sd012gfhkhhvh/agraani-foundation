@@ -1,38 +1,37 @@
 'use server';
 
 import { requirePermission } from '@/lib/auth-utils';
-import { formatApiError, logError, NotFoundError } from '@/lib/errors';
+import { formatApiError, NotFoundError } from '@/lib/errors';
+import { logError } from '@/lib/logger';
 import { Action, Resource } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
+import {
+  createAboutContentSchema,
+  updateAboutContentSchema,
+  type CreateAboutContentInput,
+  type UpdateAboutContentInput,
+} from '@/lib/validations/about';
+import type { ApiResponse } from '@/types/api';
+import type { AboutSection } from '@/types/models';
 import { revalidatePath } from 'next/cache';
 
-// Get all about content sections
-export async function getAboutContent() {
+/**
+ * Create a new about content section
+ * Server action - mutation only
+ */
+export async function createAboutContent(
+  input: CreateAboutContentInput
+): Promise<ApiResponse<AboutSection>> {
   try {
-    const sections = await prisma.aboutContent.findMany({
-      orderBy: { section: 'asc' },
-    });
+    // Validate input
+    const validated = createAboutContentSchema.parse(input);
 
-    return { success: true, data: sections };
-  } catch (error) {
-    logError(error, { action: 'getAboutContent' });
-    return { success: false, error: formatApiError(error) };
-  }
-}
-
-// Create about content section
-export async function createAboutContent(data: {
-  section: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
-}) {
-  try {
+    // Check permission
     await requirePermission(Resource.ABOUT_CONTENT, Action.CREATE);
 
     // Check if section already exists
     const existing = await prisma.aboutContent.findUnique({
-      where: { section: data.section },
+      where: { section: validated.section },
     });
 
     if (existing) {
@@ -42,66 +41,90 @@ export async function createAboutContent(data: {
       };
     }
 
+    // Create section
     const newSection = await prisma.aboutContent.create({
-      data,
+      data: {
+        section: validated.section,
+        title: validated.title,
+        content: validated.content,
+        imageUrl: validated.imageUrl || null,
+      },
     });
 
+    // Revalidate pages
     revalidatePath('/about');
     revalidatePath('/admin/about');
 
     return { success: true, data: newSection };
   } catch (error) {
-    logError(error, { action: 'createAboutContent', data });
+    logError(error, { action: 'createAboutContent', input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
-// Update about content section
+/**
+ * Update an existing about content section
+ * Server action - mutation only
+ */
 export async function updateAboutContent(
   id: string,
-  data: {
-    title?: string;
-    content?: string;
-    imageUrl?: string;
-  }
-) {
+  input: UpdateAboutContentInput
+): Promise<ApiResponse<AboutSection>> {
   try {
+    // Validate input
+    const validated = updateAboutContentSchema.parse(input);
+
+    // Check permission
     await requirePermission(Resource.ABOUT_CONTENT, Action.UPDATE);
 
+    // Check if section exists
     const section = await prisma.aboutContent.findUnique({ where: { id } });
     if (!section) {
       throw new NotFoundError('About content section');
     }
 
+    // Update section
     const updated = await prisma.aboutContent.update({
       where: { id },
-      data,
+      data: {
+        ...(validated.title && { title: validated.title }),
+        ...(validated.content && { content: validated.content }),
+        ...(validated.imageUrl !== undefined && { imageUrl: validated.imageUrl || null }),
+      },
     });
 
+    // Revalidate pages
     revalidatePath('/about');
     revalidatePath('/admin/about');
 
     return { success: true, data: updated };
   } catch (error) {
-    logError(error, { action: 'updateAboutContent', id, data });
+    logError(error, { action: 'updateAboutContent', id, input });
     return { success: false, error: formatApiError(error) };
   }
 }
 
-// Delete about content section
-export async function deleteAboutContent(id: string) {
+/**
+ * Delete an about content section
+ * Server action - mutation only
+ */
+export async function deleteAboutContent(id: string): Promise<ApiResponse<void>> {
   try {
+    // Check permission
     await requirePermission(Resource.ABOUT_CONTENT, Action.DELETE);
 
+    // Check if section exists
     const section = await prisma.aboutContent.findUnique({ where: { id } });
     if (!section) {
       throw new NotFoundError('About content section');
     }
 
+    // Delete section
     await prisma.aboutContent.delete({
       where: { id },
     });
 
+    // Revalidate pages
     revalidatePath('/about');
     revalidatePath('/admin/about');
 

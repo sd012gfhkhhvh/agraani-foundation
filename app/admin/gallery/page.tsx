@@ -10,35 +10,18 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { LoadingCard } from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createGalleryItem,
-  deleteGalleryItem,
-  getGalleryItems,
-  updateGalleryItem,
-} from '@/lib/actions';
+import { createGalleryItem, deleteGalleryItem, updateGalleryItem } from '@/lib/actions';
+import { useGalleryItems } from '@/lib/hooks/useAdminData';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Resource } from '@/lib/permissions';
 import { showError, showPromiseToast } from '@/lib/toast-utils';
+import type { GalleryItem } from '@/types/models';
 import { Edit, Image as ImageIcon, Plus, Trash2, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-interface GalleryItem {
-  id: string;
-  title: string;
-  description?: string | null;
-  imageUrl?: string | null;
-  videoUrl?: string | null;
-  type: 'IMAGE' | 'VIDEO';
-  category?: string | null;
-  order: number;
-  isActive: boolean;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
+import { useState } from 'react';
 
 export default function GalleryPage() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: items = [], isLoading, refetch } = useGalleryItems();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<Partial<GalleryItem>>({});
   const [filter, setFilter] = useState<string>('all');
@@ -49,21 +32,6 @@ export default function GalleryPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const permissions = usePermissions(Resource.GALLERY);
-
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
-    setIsLoading(true);
-    const result = await getGalleryItems();
-    if (result.success && result.data) {
-      setItems(result.data);
-    } else {
-      showError('Failed to load gallery items');
-    }
-    setIsLoading(false);
-  };
 
   const handleOpenDialog = (item?: GalleryItem) => {
     if (item) {
@@ -110,7 +78,7 @@ export default function GalleryPage() {
       });
 
       if (result.success) {
-        await fetchItems();
+        await refetch();
         setIsDialogOpen(false);
         setCurrentItem({});
       }
@@ -136,7 +104,7 @@ export default function GalleryPage() {
       });
 
       if (result.success) {
-        await fetchItems();
+        await refetch();
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       }
