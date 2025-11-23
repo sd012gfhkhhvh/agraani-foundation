@@ -1,7 +1,7 @@
-import { auth as middleware } from '@/lib/auth';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-export default middleware((request) => {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
@@ -18,8 +18,24 @@ export default middleware((request) => {
     return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
   }
 
+  // Protect admin routes
+  if (pathname.startsWith('/admin')) {
+    // Check for session token in cookies
+    // Compatible with both secure (production) and non-secure (dev) cookies
+    const sessionToken =
+      request.cookies.get('authjs.session-token')?.value ||
+      request.cookies.get('__Secure-authjs.session-token')?.value;
+
+    // If no session token, redirect to login
+    if (!sessionToken) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [

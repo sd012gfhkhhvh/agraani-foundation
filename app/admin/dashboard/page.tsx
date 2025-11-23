@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { auth } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth-utils';
 import { getDashboardStats } from '@/lib/data/dashboard';
 import {
   ArrowRight,
@@ -21,9 +21,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default async function AdminDashboardPage() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
+  if (!user) {
     redirect('/login');
   }
 
@@ -42,10 +42,8 @@ export default async function AdminDashboardPage() {
           </h1>
           <p className="text-muted-foreground text-lg">
             Welcome back,{' '}
-            <span className="font-semibold text-foreground">
-              {session.user.name || session.user.email}
-            </span>
-            . Here's what's happening today.
+            <span className="font-semibold text-foreground">{user.name || user.email}</span>. Here's
+            what's happening today.
           </p>
         </div>
         <div className="flex items-center gap-2">

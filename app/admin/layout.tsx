@@ -7,17 +7,21 @@ import { redirect } from 'next/navigation';
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const userRole = (session.user as any).role;
+  const user = session.user;
+
+  const userRole = user.role || 'VIEWER';
+  console.log('user role (from db): ', userRole);
+
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
 
   return (
     <SessionProvider session={session}>
       <AdminProviders>
-        <AdminLayoutShell user={session.user} userRole={userRole} isSuperAdmin={isSuperAdmin}>
+        <AdminLayoutShell user={user} userRole={userRole} isSuperAdmin={isSuperAdmin}>
           {children}
         </AdminLayoutShell>
       </AdminProviders>

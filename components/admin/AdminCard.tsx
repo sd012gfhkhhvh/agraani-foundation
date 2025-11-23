@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle } from 'lucide-react';
+import NextImage from 'next/image';
 
 interface AdminCardProps {
   title: string;
@@ -43,10 +44,12 @@ export function AdminCard({
       {(image || PlaceholderIcon) && (
         <div className="relative aspect-video w-full overflow-hidden bg-muted/20">
           {image ? (
-            <img
+            <NextImage
               src={image}
               alt={title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             PlaceholderIcon && (

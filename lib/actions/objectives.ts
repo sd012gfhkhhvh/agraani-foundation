@@ -27,6 +27,7 @@ export async function createObjective(
     });
 
     revalidatePath('/admin/objectives');
+    revalidatePath('/about');
     revalidatePath('/');
 
     return { success: true, data: objective };
@@ -53,6 +54,7 @@ export async function updateObjective(
     });
 
     revalidatePath('/admin/objectives');
+    revalidatePath('/about');
     revalidatePath('/');
 
     return { success: true, data: objective };
@@ -74,6 +76,7 @@ export async function deleteObjective(id: string): Promise<ApiResponse<void>> {
     });
 
     revalidatePath('/admin/objectives');
+    revalidatePath('/about');
     revalidatePath('/');
 
     return { success: true };
