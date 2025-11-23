@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>;
 }) {
   const session = await auth();
 
@@ -15,6 +15,7 @@ export default async function AdminLoginPage({
 
   // Await searchParams to access its properties
   const params = await searchParams;
+  const redirectTo = params.callbackUrl || '/admin/dashboard';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -36,7 +37,7 @@ export default async function AdminLoginPage({
           <form
             action={async () => {
               'use server';
-              await signIn('google', { redirectTo: '/admin/dashboard' });
+              await signIn('google', { redirectTo });
             }}
           >
             <button
