@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
-import { getBlogPostBySlug } from '@/lib/data';
+import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/data';
 import { generateSEO } from '@/lib/seo';
 import { Calendar, Tag, User } from 'lucide-react';
 import { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -22,9 +23,30 @@ function formatDate(date: Date | string): string {
   }).format(d);
 }
 
+// Pre-generate top 10 blog posts at build time
+export async function generateStaticParams() {
+  const posts = await getPublishedBlogPosts(10);
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
+// Cached blog post fetching
+const getCachedBlogPost = unstable_cache(
+  async (slug: string) => {
+    return await getBlogPostBySlug(slug);
+  },
+  ['blog-post'],
+  {
+    revalidate: 3600, // 1 hour cache
+    tags: ['blog'],
+  }
+);
+
 export async function generateMetadata(props: BlogPostPageProps): Promise<Metadata> {
   const params = await props.params;
-  const post = await getBlogPostBySlug(params.slug);
+  const post = await getCachedBlogPost(params.slug);
 
   if (!post) {
     return { title: 'Post Not Found' };
@@ -40,7 +62,7 @@ export async function generateMetadata(props: BlogPostPageProps): Promise<Metada
 
 export default async function BlogPostPage(props: BlogPostPageProps) {
   const params = await props.params;
-  const post = await getBlogPostBySlug(params.slug);
+  const post = await getCachedBlogPost(params.slug);
 
   if (!post) {
     notFound();

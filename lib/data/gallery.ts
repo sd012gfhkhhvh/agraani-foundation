@@ -122,3 +122,20 @@ export async function getAllGalleryItems(): Promise<GalleryItem[]> {
 
   return items;
 }
+
+/**
+ * Get all unique categories from active gallery items with counts
+ * Optimized query - fetches only distinct category names and counts
+ */
+export async function getGalleryCategoriesWithCounts() {
+  const result = await prisma.galleryItem.groupBy({
+    by: ['category'],
+    where: { isActive: true },
+    _count: true,
+  });
+
+  return result.map((item) => ({
+    category: item.category || 'Uncategorized',
+    count: item._count,
+  }));
+}

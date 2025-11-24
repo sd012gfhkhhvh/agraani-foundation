@@ -2,9 +2,12 @@ import { GalleryGrid } from '@/components/public/gallery-lightbox-wrapper';
 import { ServerPagination } from '@/components/public/server-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { getActiveGalleryItems, getGalleryItemsPaginated } from '@/lib/data';
+import { getGalleryItemsPaginated } from '@/lib/data';
+import { getGalleryCategoriesWithCounts } from '@/lib/data/gallery';
 import { Camera, Sparkles } from 'lucide-react';
 import { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
+import Link from 'next/link';
 
 export const revalidate = 3600; // ISR - revalidate every hour
 
@@ -12,6 +15,31 @@ export const metadata: Metadata = {
   title: 'Gallery - Agraani Welfare Foundation',
   description: 'Explore photos and videos from our programs, events, and community initiatives.',
 };
+
+// Cached data fetching for better performance
+const getCachedGalleryItems = unstable_cache(
+  async (page: number, category?: string) => {
+    return await getGalleryItemsPaginated({
+      page,
+      limit: 12,
+      filters: category ? { category } : undefined,
+    });
+  },
+  ['gallery-items-paginated'],
+  {
+    revalidate: 3600, // 1 hour cache
+    tags: ['gallery'],
+  }
+);
+
+const getCachedCategories = unstable_cache(
+  async () => getGalleryCategoriesWithCounts(),
+  ['gallery-categories'],
+  {
+    revalidate: 86400, // 24 hours
+    tags: ['gallery'],
+  }
+);
 
 export default async function GalleryPage({
   searchParams,
@@ -22,16 +50,17 @@ export default async function GalleryPage({
   const currentPage = Number(params.page) || 1;
   const activeCategory = params.category;
 
-  // Fetch paginated gallery items
-  const { items: galleryItems, totalPages } = await getGalleryItemsPaginated({
-    page: currentPage,
-    limit: 12,
-    filters: activeCategory ? { category: activeCategory } : undefined,
-  });
+  // Use cached data fetching
+  const [{ items: galleryItems, totalPages }, categories] = await Promise.all([
+    getCachedGalleryItems(currentPage, activeCategory),
+    getCachedCategories(),
+  ]);
 
-  // Get all items to extract unique categories (could be optimized with a separate query)
-  const allItems = await getActiveGalleryItems();
-  const categories = Array.from(new Set(allItems.map((item) => item.category).filter(Boolean)));
+  const totalItems = categories.reduce((acc, cat) => acc + cat.count, 0);
+  const itemCounts: Record<string, number> = { all: totalItems };
+  categories.forEach((cat) => {
+    itemCounts[cat.category] = cat.count;
+  });
 
   return (
     <div className="min-h-screen">
@@ -57,36 +86,40 @@ export default async function GalleryPage({
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-20">
+      <section id="gallery-grid" className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Category Filters */}
           {categories.length > 0 && (
             <div className="flex flex-wrap gap-3 mb-8 justify-center">
-              <a href="/gallery">
+              <Link href="/gallery" scroll={false}>
                 <Badge
                   variant={!activeCategory ? 'default' : 'outline'}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all hover:scale-105 ${
                     !activeCategory ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted'
                   }`}
                 >
-                  All ({allItems.length})
+                  All ({itemCounts.all})
                 </Badge>
-              </a>
-              {categories.map((category) => {
-                const count = allItems.filter((item) => item.category === category).length;
+              </Link>
+              {categories.map((cat) => {
+                const count = itemCounts[cat.category];
                 return (
-                  <a key={category} href={`/gallery?category=${category}`}>
+                  <Link
+                    key={cat.category}
+                    href={`/gallery?category=${cat.category}`}
+                    scroll={false}
+                  >
                     <Badge
-                      variant={activeCategory === category ? 'default' : 'outline'}
+                      variant={activeCategory === cat.category ? 'default' : 'outline'}
                       className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all hover:scale-105 ${
-                        activeCategory === category
+                        activeCategory === cat.category
                           ? 'bg-primary text-white shadow-lg'
                           : 'hover:bg-muted'
                       }`}
                     >
-                      {category} ({count})
+                      {cat.category} ({count})
                     </Badge>
-                  </a>
+                  </Link>
                 );
               })}
             </div>

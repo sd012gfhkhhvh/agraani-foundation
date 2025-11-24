@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getBlogPostsPaginated, getPublishedBlogPosts } from '@/lib/data';
 import { ArrowRight, Calendar, Newspaper, Sparkles, TrendingUp, User } from 'lucide-react';
 import { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import Link from 'next/link';
 
 export const revalidate = 3600; // ISR - revalidate every hour
@@ -15,6 +16,33 @@ export const metadata: Metadata = {
     'Stay updated with the latest news, announcements, and success stories from Agraani Welfare Foundation.',
 };
 
+// Cached data fetching for better performance
+const getCachedFeaturedPost = unstable_cache(
+  async () => {
+    const posts = await getPublishedBlogPosts(1);
+    return posts[0];
+  },
+  ['news-featured-post'],
+  {
+    revalidate: 3600, // 1 hour cache
+    tags: ['blog', 'news'],
+  }
+);
+
+const getCachedNewsPosts = unstable_cache(
+  async (page: number) => {
+    return await getBlogPostsPaginated({
+      page,
+      limit: 12,
+    });
+  },
+  ['news-posts-paginated'],
+  {
+    revalidate: 3600,
+    tags: ['blog', 'news'],
+  }
+);
+
 export default async function NewsPage({
   searchParams,
 }: {
@@ -23,15 +51,11 @@ export default async function NewsPage({
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
 
-  // Get featured post (always the first/latest)
-  const allPosts = await getPublishedBlogPosts(1);
-  const featuredPost = allPosts[0];
-
-  // Get paginated posts (skip the featured one on page 1)
-  const { posts, totalPages } = await getBlogPostsPaginated({
-    page: currentPage,
-    limit: 12,
-  });
+  // Use cached data fetching
+  const [featuredPost, { posts, totalPages }] = await Promise.all([
+    getCachedFeaturedPost(),
+    getCachedNewsPosts(currentPage),
+  ]);
 
   // On page 1, remove featured post from the list to avoid duplication
   const displayPosts =

@@ -13,7 +13,7 @@ import {
 } from '@/lib/validations/gallery';
 import type { ApiResponse } from '@/types/api';
 import type { GalleryItem } from '@/types/models';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function createGalleryItem(
   input: CreateGalleryItemInput
@@ -28,6 +28,7 @@ export async function createGalleryItem(
 
     revalidatePath('/admin/gallery');
     revalidatePath('/gallery');
+    revalidateTag('gallery');
 
     return { success: true, data: item };
   } catch (error) {
@@ -54,6 +55,7 @@ export async function updateGalleryItem(
 
     revalidatePath('/admin/gallery');
     revalidatePath('/gallery');
+    revalidateTag('gallery');
 
     return { success: true, data: item };
   } catch (error) {
@@ -75,6 +77,7 @@ export async function deleteGalleryItem(id: string): Promise<ApiResponse<void>> 
 
     revalidatePath('/admin/gallery');
     revalidatePath('/gallery');
+    revalidateTag('gallery');
 
     return { success: true };
   } catch (error) {

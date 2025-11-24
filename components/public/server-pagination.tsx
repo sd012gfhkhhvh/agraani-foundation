@@ -59,7 +59,7 @@ export function ServerPagination({
     <nav className={`flex items-center justify-center gap-2 ${className}`} aria-label="Pagination">
       {/* Previous Button */}
       {currentPage > 1 ? (
-        <Link href={`${basePath}?page=${currentPage - 1}`} prefetch={true}>
+        <Link scroll={false} href={`${basePath}?page=${currentPage - 1}`} prefetch={true}>
           <Button variant="outline" size="sm" className="gap-1">
             <ChevronLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Previous</span>
@@ -86,11 +86,11 @@ export function ServerPagination({
           const isActive = page === currentPage;
 
           return (
-            <Link key={page} href={`${basePath}?page=${page}`} prefetch={true}>
+            <Link key={page} scroll={false} href={`${basePath}?page=${page}`} prefetch={true}>
               <Button
                 variant={isActive ? 'default' : 'outline'}
                 size="sm"
-                className={`min-w-[2.5rem] ${isActive ? 'pointer-events-none' : ''}`}
+                className={`min-w-10 ${isActive ? 'pointer-events-none' : ''}`}
               >
                 {page}
               </Button>
@@ -101,7 +101,7 @@ export function ServerPagination({
 
       {/* Next Button */}
       {currentPage < totalPages ? (
-        <Link href={`${basePath}?page=${currentPage + 1}`} prefetch={true}>
+        <Link scroll={false} href={`${basePath}?page=${currentPage + 1}`} prefetch={true}>
           <Button variant="outline" size="sm" className="gap-1">
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4" />

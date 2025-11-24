@@ -13,8 +13,9 @@ export interface PaginatedBlogResult {
 }
 
 /**
- * Get paginated published blog posts for public pages
- * Returns posts for current page + total count
+ * Get paginated published blog posts with metadata
+ * Returns posts + total count + total pages
+ * Use this for: user-facing pagination, blog list pages
  */
 export async function getBlogPostsPaginated({
   page = 1,
@@ -58,9 +59,9 @@ export async function getBlogPostsPaginated({
 }
 
 /**
- * Get published blog posts for public pages
- * Ordered by published date, optionally limited
- * @deprecated Use getBlogPostsPaginated for better performance
+ * Get latest published blog posts
+ * Use this for: featured posts, widgets, RSS feeds, sitemaps
+ * For paginated lists, use getBlogPostsPaginated() instead
  */
 export async function getPublishedBlogPosts(limit?: number): Promise<BlogPost[]> {
   const posts = await prisma.blogPost.findMany({

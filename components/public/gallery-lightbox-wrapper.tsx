@@ -4,8 +4,8 @@ import { GalleryLightbox as GalleryLightboxModal } from '@/components/public/gal
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Image as ImageIcon, Video } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
+import { ImageWithFallback } from './image-with-fallback';
 
 interface GalleryItem {
   id: string;
@@ -42,9 +42,10 @@ export function GalleryGrid({ items }: GalleryGridProps) {
           >
             <div className="relative aspect-square overflow-hidden">
               {item.type === 'IMAGE' && item.imageUrl ? (
-                <Image
+                <ImageWithFallback
                   src={item.imageUrl}
                   alt={item.title}
+                  fill
                   className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                 />
               ) : item.type === 'VIDEO' && item.videoUrl ? (

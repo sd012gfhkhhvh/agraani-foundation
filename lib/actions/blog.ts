@@ -13,7 +13,7 @@ import {
 } from '@/lib/validations/blog';
 import type { ApiResponse } from '@/types/api';
 import type { BlogPost } from '@/types/models';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 /**
  * Create a new blog post
@@ -62,6 +62,9 @@ export async function createBlogPost(input: CreateBlogPostInput): Promise<ApiRes
     if (validated.isPublished) {
       revalidatePath(`/blog/${post.slug}`);
     }
+
+    revalidateTag('blog');
+    revalidateTag('news');
 
     return { success: true, data: post };
   } catch (error) {
@@ -137,6 +140,9 @@ export async function updateBlogPost(
       revalidatePath(`/blog/${post.slug}`);
     }
 
+    revalidateTag('blog');
+    revalidateTag('news');
+
     return { success: true, data: post };
   } catch (error) {
     logError(error, { action: 'updateBlogPost', id, input });
@@ -169,6 +175,9 @@ export async function deleteBlogPost(id: string): Promise<ApiResponse<void>> {
     revalidatePath('/blog');
     revalidatePath('/news');
     revalidatePath(`/blog/${post.slug}`);
+
+    revalidateTag('blog');
+    revalidateTag('news');
 
     return { success: true };
   } catch (error) {

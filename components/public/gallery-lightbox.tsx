@@ -119,6 +119,8 @@ export function GalleryLightbox({
             <Image
               src={currentItem.imageUrl}
               alt={currentItem.title}
+              width={700}
+              height={700}
               className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl"
             />
           )}

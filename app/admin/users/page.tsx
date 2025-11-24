@@ -100,8 +100,10 @@ export default function UsersPage() {
                       {user.image ? (
                         <Image
                           src={user.image}
+                          width={36}
+                          height={36}
                           alt={user.name || 'User'}
-                          className="h-9 w-9 rounded-full object-cover"
+                          className="rounded-full object-cover"
                         />
                       ) : (
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">

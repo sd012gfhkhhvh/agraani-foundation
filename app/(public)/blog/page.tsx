@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getBlogPostsPaginated } from '@/lib/data';
 import { ArrowRight, BookOpen, Calendar, Sparkles, User } from 'lucide-react';
 import { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import Link from 'next/link';
 
 export const revalidate = 3600; // ISR - revalidate every hour
@@ -14,6 +15,21 @@ export const metadata: Metadata = {
     'Read our latest articles about women empowerment, community development, and stories of transformation.',
 };
 
+// Cached data fetching for better performance
+const getCachedBlogPosts = unstable_cache(
+  async (page: number) => {
+    return await getBlogPostsPaginated({
+      page,
+      limit: 12,
+    });
+  },
+  ['blog-posts-paginated'],
+  {
+    revalidate: 3600, // 1 hour cache
+    tags: ['blog'],
+  }
+);
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -22,11 +38,8 @@ export default async function BlogPage({
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
 
-  // Fetch paginated blog posts
-  const { posts, totalPages } = await getBlogPostsPaginated({
-    page: currentPage,
-    limit: 12,
-  });
+  // Use cached data fetching
+  const { posts, totalPages } = await getCachedBlogPosts(currentPage);
 
   return (
     <div className="min-h-screen">
