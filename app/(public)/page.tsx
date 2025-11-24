@@ -45,11 +45,11 @@ export default async function HomePage() {
         </div>
 
         {/* Floating particles effect */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-2 h-2 bg-white/20 rounded-full animate-float"
+              className="absolute w-2 h-2 bg-white/20 rounded-full animate-float hidden md:block"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -58,17 +58,30 @@ export default async function HomePage() {
               }}
             />
           ))}
+          {/* Mobile particles - fewer and smaller */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={`mobile-${i}`}
+              className="absolute w-1 h-1 bg-white/30 rounded-full animate-float md:hidden"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${4 + Math.random() * 6}s`,
+              }}
+            />
+          ))}
         </div>
 
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-white">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6 animate-fade-in">
-              <Sparkles className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-medium">Transforming Lives Since 2020</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4 md:mb-6 animate-fade-in">
+              <Sparkles className="h-3 w-3 md:h-4 md:w-4 text-secondary" />
+              <span className="text-xs md:text-sm font-medium">Transforming Lives Since 2020</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight">
               {hero?.title || 'Empowering Women,'}
               <br />
               <span className="text-gradient-secondary animate-pulse">
@@ -76,19 +89,19 @@ export default async function HomePage() {
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 text-gray-200 leading-relaxed">
               {hero?.description ||
                 'Join us in creating sustainable change through education, skill development, and community empowerment across West Bengal.'}
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 asChild
                 size="lg"
-                className="btn-gradient-secondary text-lg px-8 py-6 hover:scale-105 transition-smooth shadow-2xl"
+                className="btn-gradient-secondary text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 hover:scale-105 transition-smooth shadow-2xl w-full sm:w-auto"
               >
                 <Link href="/donate">
-                  <Heart className="h-5 w-5 mr-2" />
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Support Our Mission
                 </Link>
               </Button>
@@ -96,11 +109,11 @@ export default async function HomePage() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 text-lg px-8 py-6"
+                className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 w-full sm:w-auto"
               >
                 <Link href="/programs">
                   Explore Programs
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                 </Link>
               </Button>
             </div>

@@ -90,6 +90,9 @@ async function main() {
         slug: 'women-child-education',
         description:
           'Improving access to quality education & training for girls and women in rural and marginalized areas. We work to ensure every girl has the opportunity to receive quality education and develop essential life skills.',
+        targets: 'Girls and women in rural and educationally marginalized areas of West Bengal',
+        impact:
+          '500+ girls and women receiving quality education and life skills training annually',
         imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
         icon: 'BookOpen',
         order: 1,
@@ -100,6 +103,8 @@ async function main() {
         slug: 'skill-training',
         description:
           'Comprehensive vocational training programs followed by guaranteed placement opportunities. We equip individuals with market-relevant skills to ensure sustainable employment and economic independence.',
+        targets: 'Youth seeking vocational training and employment opportunities',
+        impact: '200+ skilled individuals per year with 95% placement rate',
         imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
         icon: 'GraduationCap',
         order: 2,
@@ -110,6 +115,9 @@ async function main() {
         slug: 'child-development',
         description:
           'Child development and educational support programs to nurture young minds. We provide holistic development opportunities including academic support, extracurricular activities, and health services.',
+        targets:
+          'Children from impoverished families requiring educational and developmental support',
+        impact: '100+ students supported with holistic development programs',
         imageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
         icon: 'Heart',
         order: 3,
@@ -120,6 +128,8 @@ async function main() {
         slug: 'healthcare',
         description:
           'Supporting impoverished people with medical needs and healthcare access. We organize health camps, provide medical assistance, and ensure access to basic healthcare services.',
+        targets: 'Impoverished families in rural communities lacking access to healthcare',
+        impact: '500+ families serviced through annual health camps and medical assistance',
         imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800',
         icon: 'Stethoscope',
         order: 4,
@@ -130,6 +140,8 @@ async function main() {
         slug: 'rural-talent',
         description:
           'Promoting local rural talent through various initiatives and platforms. We identify and nurture talent in rural areas, providing opportunities for growth and recognition.',
+        targets: 'Talented individuals in rural areas seeking platforms for growth and recognition',
+        impact: '50+ rural talents identified and promoted annually through various platforms',
         imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800',
         icon: 'Star',
         order: 5,
@@ -140,6 +152,8 @@ async function main() {
         slug: 'senior-care',
         description:
           'Providing personal home-care assistant services for senior citizens. Our trained caregivers offer compassionate support and assistance to elderly individuals in their homes.',
+        targets: 'Senior citizens requiring personal home-care assistance and support',
+        impact: '30+ seniors receiving quality home-care services monthly',
         imageUrl: 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=800',
         icon: 'Users',
         order: 6,

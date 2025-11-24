@@ -1,10 +1,8 @@
-import { ImageWithFallback } from '@/components/public/image-with-fallback';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { ProgramFlipCard } from '@/components/public/program-flip-card';
+import { Card } from '@/components/ui/card';
 import { getActivePrograms } from '@/lib/data';
-import { ArrowRight, Book, Heart, Sparkles, Users } from 'lucide-react';
+import { Book, Sparkles, Target, TrendingUp, Users } from 'lucide-react';
 import { Metadata } from 'next';
-import Link from 'next/link';
 
 export const revalidate = 3600; // ISR - revalidate every hour
 
@@ -20,20 +18,20 @@ export default async function ProgramsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-28 bg-linear-to-br from-primary via-primary/90 to-accent overflow-hidden">
+      <section className="relative py-16 md:py-20 lg:py-28 bg-linear-to-br from-primary via-primary/90 to-accent overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/topography.svg')] opacity-10" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl text-white">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
-              <Sparkles className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-medium">Creating Lasting Impact</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4 md:mb-6">
+              <Sparkles className="h-3 w-3 md:h-4 md:w-4 text-secondary" />
+              <span className="text-xs md:text-sm font-medium">Creating Lasting Impact</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
               Our <span className="text-secondary">Programs</span>
             </h1>
-            <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl opacity-90 leading-relaxed">
               Comprehensive initiatives designed to empower women and transform communities through
               education, skill development, and sustainable livelihood opportunities.
             </p>
@@ -41,150 +39,95 @@ export default async function ProgramsPage() {
         </div>
       </section>
 
-      {/* Programs Grid */}
-      <section className="py-20">
+      {/* Programs with Flip Cards */}
+      <section className="py-12 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {programs.length === 0 ? (
-            <Card className="p-16 text-center">
-              <Book className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold mb-2">No programs available yet</h3>
+            <Card className="p-12 md:p-16 text-center">
+              <Book className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl md:text-2xl font-semibold mb-2">No programs available yet</h3>
               <p className="text-muted-foreground">Check back soon for our upcoming initiatives</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {programs.map((program, index) => (
-                <Card
-                  key={program.id}
-                  className="card-hover group overflow-hidden h-full flex flex-col"
-                >
-                  {/* Image Section */}
-                  <div className="relative h-56 overflow-hidden">
-                    <ImageWithFallback
-                      src={program.imageUrl}
-                      alt={program.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-smooth"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
+            <>
+              {/* Section Header */}
+              <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">
+                  Our <span className="text-gradient-primary">Initiatives</span>
+                </h2>
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Hover or tap on any card to explore detailed information about our programs
+                </p>
+              </div>
 
-                    {/* Number Badge */}
-                    <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white flex items-center justify-center font-bold text-primary text-xl shadow-lg">
-                      {(index + 1).toString().padStart(2, '0')}
-                    </div>
-
-                    {/* Title Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h3 className="text-2xl font-bold text-white mb-1">{program.title}</h3>
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <CardContent className="p-6 flex-1 flex flex-col">
-                    <p className="text-muted-foreground leading-relaxed mb-6 flex-1">
-                      {program.description}
-                    </p>
-
-                    {/* Action Button */}
-                    <Link href="/contact">
-                      <Button
-                        variant="outline"
-                        className="w-full group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-smooth"
-                      >
-                        <Heart className="h-4 w-4 mr-2" />
-                        Support This Program
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+              {/* Flip Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {programs.map((program) => (
+                  <ProgramFlipCard key={program.id} program={program} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
 
-      {/* Impact Section */}
-      <section className="py-20 bg-linear-to-b from-muted/30 to-background">
+      {/* Impact Stats */}
+      <section className="py-12 md:py-20 bg-linear-to-b from-muted/30 to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold mb-6">
-                Making a <span className="text-gradient-primary">Real Difference</span>
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                Our programs are designed with community input and driven by measurable outcomes. We
-                work hand-in-hand with local leaders to ensure sustainable, long-term impact.
-              </p>
-              <ul className="space-y-4">
-                {[
-                  'Community-centered approach',
-                  'Skills training & certification',
-                  'Mentorship & ongoing support',
-                  'Sustainable livelihood creation',
-                ].map((item, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <div className="shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    </div>
-                    <span className="text-lg">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">
+              Program <span className="text-gradient-secondary">Impact</span>
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Measurable outcomes from our community programs
+            </p>
+          </div>
 
-            <Card className="card-hover">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-2 gap-6">
-                  {[
-                    { icon: Users, value: '500+', label: 'Beneficiaries' },
-                    { icon: Book, value: '12', label: 'Active Programs' },
-                    { icon: Heart, value: '30+', label: 'Partners' },
-                    { icon: Sparkles, value: '95%', label: 'Success Rate' },
-                  ].map((stat, index) => (
-                    <div key={index} className="text-center">
-                      <stat.icon className="h-8 w-8 text-primary mx-auto mb-3" />
-                      <div className="text-3xl font-bold text-gradient-primary mb-1">
-                        {stat.value}
-                      </div>
-                      <div className="text-sm text-muted-foreground">{stat.label}</div>
-                    </div>
-                  ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <Card className="card-hover text-center">
+              <div className="p-6 md:p-8">
+                <div className="inline-flex p-3 md:p-4 bg-primary/10 rounded-2xl mb-3 md:mb-4">
+                  <Users className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                 </div>
-              </CardContent>
+                <div className="text-2xl md:text-4xl font-bold text-primary mb-1 md:mb-2">500+</div>
+                <p className="text-xs md:text-sm text-muted-foreground">Beneficiaries</p>
+              </div>
+            </Card>
+
+            <Card className="card-hover text-center">
+              <div className="p-6 md:p-8">
+                <div className="inline-flex p-3 md:p-4 bg-secondary/10 rounded-2xl mb-3 md:mb-4">
+                  <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-secondary" />
+                </div>
+                <div className="text-2xl md:text-4xl font-bold text-secondary mb-1 md:mb-2">
+                  85%
+                </div>
+                <p className="text-xs md:text-sm text-muted-foreground">Success Rate</p>
+              </div>
+            </Card>
+
+            <Card className="card-hover text-center">
+              <div className="p-6 md:p-8">
+                <div className="inline-flex p-3 md:p-4 bg-accent/10 rounded-2xl mb-3 md:mb-4">
+                  <Target className="h-6 w-6 md:h-8 md:w-8 text-accent" />
+                </div>
+                <div className="text-2xl md:text-4xl font-bold text-accent mb-1 md:mb-2">
+                  {programs.length}
+                </div>
+                <p className="text-xs md:text-sm text-muted-foreground">Active Programs</p>
+              </div>
+            </Card>
+
+            <Card className="card-hover text-center">
+              <div className="p-6 md:p-8">
+                <div className="inline-flex p-3 md:p-4 bg-primary/10 rounded-2xl mb-3 md:mb-4">
+                  <Book className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                </div>
+                <div className="text-2xl md:text-4xl font-bold text-primary mb-1 md:mb-2">200+</div>
+                <p className="text-xs md:text-sm text-muted-foreground">Workshops</p>
+              </div>
             </Card>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <Card className="border-2 border-primary/20 overflow-hidden">
-            <div className="relative p-8 md:p-12 bg-linear-to-r from-primary/5 to-secondary/5">
-              <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-5" />
-              <div className="relative z-10 text-center">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Ready to <span className="text-gradient-primary">Make an Impact?</span>
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Your support helps us expand our programs and reach more communities in need.
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Link href="/donate">
-                    <Button size="lg" className="btn-gradient-primary">
-                      <Heart className="h-5 w-5 mr-2" />
-                      Donate Now
-                    </Button>
-                  </Link>
-                  <Link href="/contact">
-                    <Button size="lg" variant="outline">
-                      Partner With Us
-                      <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </Card>
         </div>
       </section>
     </div>

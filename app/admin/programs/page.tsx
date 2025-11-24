@@ -54,6 +54,8 @@ export default function ProgramsPage() {
             title: currentProgram.title,
             slug: currentProgram.slug,
             description: currentProgram.description,
+            targets: currentProgram.targets ?? undefined,
+            impact: currentProgram.impact ?? undefined,
             imageUrl: currentProgram.imageUrl ?? undefined,
             icon: currentProgram.icon ?? undefined,
             order: currentProgram.order,
@@ -63,6 +65,8 @@ export default function ProgramsPage() {
             title: currentProgram.title,
             slug: currentProgram.slug || '',
             description: currentProgram.description,
+            targets: currentProgram.targets || '',
+            impact: currentProgram.impact || '',
             imageUrl: currentProgram.imageUrl || '',
             icon: currentProgram.icon ?? undefined,
             order: currentProgram.order ?? programs.length,
@@ -247,6 +251,26 @@ export default function ProgramsPage() {
                 setCurrentProgram({ ...currentProgram, description: e.target.value })
               }
               placeholder="Describe the program and its impact..."
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Target Beneficiaries</label>
+            <Textarea
+              rows={2}
+              value={currentProgram.targets || ''}
+              onChange={(e) => setCurrentProgram({ ...currentProgram, targets: e.target.value })}
+              placeholder="e.g., Women and children in rural communities"
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-2">Expected Impact</label>
+            <Textarea
+              rows={2}
+              value={currentProgram.impact || ''}
+              onChange={(e) => setCurrentProgram({ ...currentProgram, impact: e.target.value })}
+              placeholder="e.g., 500+ beneficiaries annually"
             />
           </div>
 

@@ -30,31 +30,45 @@ export function GalleryGrid({ items }: GalleryGridProps) {
     setLightboxOpen(true);
   };
 
+  // Function to determine grid row span for masonry effect
+  const getRowSpan = (index: number): string => {
+    // Create varied heights for masonry effect
+    const patterns = [
+      'row-span-1',
+      'row-span-2',
+      'row-span-1',
+      'row-span-2',
+      'row-span-1',
+      'row-span-1',
+    ];
+    return patterns[index % patterns.length];
+  };
+
   return (
     <>
-      {/* Gallery Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Masonry Gallery Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-[200px]">
         {items.map((item, index) => (
           <Card
             key={item.id}
-            className="group overflow-hidden card-hover cursor-pointer"
+            className={`group overflow-hidden card-hover cursor-pointer ${getRowSpan(index)}`}
             onClick={() => openLightbox(index)}
           >
-            <div className="relative aspect-square overflow-hidden">
+            <div className="relative w-full h-full overflow-hidden">
               {item.type === 'IMAGE' && item.imageUrl ? (
                 <ImageWithFallback
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                  className="object-cover group-hover:scale-110 transition-smooth"
                 />
               ) : item.type === 'VIDEO' && item.videoUrl ? (
                 <div className="w-full h-full flex items-center justify-center bg-black/90">
-                  <Video className="h-16 w-16 text-white/70" />
+                  <Video className="h-12 w-12 md:h-16 md:w-16 text-white/70" />
                 </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/10 to-secondary/10">
-                  <ImageIcon className="h-16 w-16 text-primary/30" />
+                  <ImageIcon className="h-12 w-12 md:h-16 md:w-16 text-primary/30" />
                 </div>
               )}
 
@@ -63,7 +77,7 @@ export function GalleryGrid({ items }: GalleryGridProps) {
 
               {/* Type Badge */}
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-smooth">
-                <Badge variant="secondary" className="backdrop-blur-md bg-white/90">
+                <Badge variant="secondary" className="backdrop-blur-md bg-white/90 text-xs">
                   {item.type === 'IMAGE' ? (
                     <ImageIcon className="h-3 w-3 mr-1" />
                   ) : (
@@ -76,17 +90,21 @@ export function GalleryGrid({ items }: GalleryGridProps) {
               {/* Category Badge */}
               {item.category && (
                 <div className="absolute top-3 left-3">
-                  <Badge variant="default" className="backdrop-blur-md">
+                  <Badge variant="default" className="backdrop-blur-md text-xs">
                     {item.category}
                   </Badge>
                 </div>
               )}
 
               {/* Title Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-smooth">
-                <h3 className="text-white font-semibold text-lg">{item.title}</h3>
+              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-smooth">
+                <h3 className="text-white font-semibold text-sm md:text-lg line-clamp-1">
+                  {item.title}
+                </h3>
                 {item.description && (
-                  <p className="text-white/80 text-sm line-clamp-2 mt-1">{item.description}</p>
+                  <p className="text-white/80 text-xs md:text-sm line-clamp-2 mt-1">
+                    {item.description}
+                  </p>
                 )}
               </div>
             </div>

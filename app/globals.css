@@ -235,4 +235,13 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
+
+  /* Flip card utilities */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
 }

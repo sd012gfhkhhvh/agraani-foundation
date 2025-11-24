@@ -29,6 +29,8 @@ export async function createProgram(input: CreateProgramInput): Promise<ApiRespo
         title: validated.title,
         slug: validated.slug,
         description: validated.description,
+        targets: validated.targets || null,
+        impact: validated.impact || null,
         imageUrl: validated.imageUrl || null,
         icon: validated.icon || null,
         order: validated.order || 0,

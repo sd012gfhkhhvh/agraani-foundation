@@ -103,6 +103,8 @@ model Program {
   title       String
   slug        String   @unique
   description String   @db.Text
+  targets     String?  @db.Text // Target beneficiaries
+  impact      String?  @db.Text // Expected impact
   imageUrl    String?
   icon        String?
   order       Int      @default(0)
@@ -112,6 +114,7 @@ model Program {
 
   @@index([slug, isActive])
 }
+
 
 model Objective {
   id          String   @id @default(cuid())

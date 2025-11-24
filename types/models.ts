@@ -42,6 +42,8 @@ export type Program = {
   title: string;
   slug: string;
   description: string;
+  targets: string | null;
+  impact: string | null;
   imageUrl: string | null;
   icon: string | null;
   order: number;
